@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data
+output/*.json
+output/*.csv
+output/*.xml
+!output/.gitkeep
+
+# Mac
+.DS_Store
+
+# Embeddings cache (optional)
+output/embeddings.npy
+
+# Environment
+.env
+.env.local

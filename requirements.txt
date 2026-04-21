@@ -1,0 +1,16 @@
+# Core
+feedparser>=6.0.0
+requests>=2.31.0
+
+# Data processing
+pandas>=2.0.0
+
+# Semantic search (optional, for upgrade)
+# sentence-transformers>=2.2.0
+# numpy>=1.24.0
+
+# LLM classification (optional, for upgrade)
+# anthropic>=0.18.0
+
+# HTTP server for local preview
+# (built-in: python3 -m http.server)

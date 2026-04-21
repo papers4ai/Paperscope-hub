@@ -1,0 +1,38 @@
+name: Weekly Paper Update
+
+on:
+  schedule:
+    # 每周一至周五 UTC 00:30
+    - cron: '30 0 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Fetch new papers
+        run: |
+          python main.py --update
+
+      - name: Run pipeline
+        run: |
+          python pipeline.py
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add output/
+          git commit -m "Update papers - $(date +%Y-%m-%d)" || exit 0
+          git push
