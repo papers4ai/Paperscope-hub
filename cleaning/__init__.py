@@ -141,19 +141,18 @@ def extract_code_links(text: str) -> List[str]:
         matches = re.findall(pattern, text, re.IGNORECASE)
         links.extend(matches)
 
-    # Remove duplicates while preserving order
+    # Remove duplicates while preserving order, max 3 links
     seen = set()
     cleaned = []
     for link in links:
         link = link.rstrip('.,;:!?。；：！？')
-        # Ensure each unique link appears only once
         if link not in seen and len(link) > 10:
             seen.add(link)
             cleaned.append(link)
+            if len(cleaned) >= 3:
+                break
 
     return cleaned
-
-    return list(set(cleaned))[:3]  # Max 3 links
 
 
 def extract_month(published: str) -> int:
@@ -171,7 +170,7 @@ def classify_paper_type(title: str, abstract: str) -> str:
     # Survey patterns (highest priority)
     survey_patterns = [
         r"\bsurvey\b", r"\breview\b", r"\boverview\b",
-        r"\btutorial\b", r"\bguided\b",
+        r"\btutorial\b",
         r"comprehensive\s+(study|analysis|review|survey)",
         r"systematic\s+review", r"literature\s+review",
     ]

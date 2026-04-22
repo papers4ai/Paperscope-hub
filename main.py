@@ -5,6 +5,7 @@ Main entry point for paper fetching
 - 自动增量更新（只抓取缺失的年份）
 """
 
+import argparse
 import json
 import logging
 import os
@@ -71,7 +72,7 @@ def save_papers(papers):
     logger.info(f"Saved {len(papers)} papers")
 
 
-def main():
+def main(force_update_current_year: bool = False):
     base_queries = SEARCH_QUERIES
 
     # 加载已有论文
@@ -87,9 +88,13 @@ def main():
             except:
                 pass
 
-    # 需要抓取的年份（2023-2026，缺失的年份）
+    # 需要抓取的年份（缺失的年份）
+    # 当前年份始终重新抓取以获取最新论文（--update 时也强制重抓）
     all_years = list(range(START_YEAR, END_YEAR + 1))
     years_to_fetch = [y for y in all_years if y not in existing_years]
+    if END_YEAR not in years_to_fetch and (force_update_current_year or END_YEAR in existing_years):
+        years_to_fetch.append(END_YEAR)
+        logger.info(f"Will re-fetch current year {END_YEAR} for latest papers")
 
     if not years_to_fetch:
         logger.info(f"All years already fetched. Total papers: {len(existing_papers)}")
@@ -105,7 +110,7 @@ def main():
     # 先按年份分组，每年内并行执行多个查询
     for year in years_to_fetch:
         logger.info(f"=== Fetching year {year} ===")
-        tasks = [(query, year, 1000, 3.0) for query in base_queries]
+        tasks = [(query, year, MAX_RESULTS, 3.0) for query in base_queries]
         year_papers = {}
 
         with ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as executor:
@@ -135,4 +140,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Fetch papers from arXiv")
+    parser.add_argument("--update", action="store_true", help="Force re-fetch current year for new papers")
+    args = parser.parse_args()
+    main(force_update_current_year=args.update)

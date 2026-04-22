@@ -15,8 +15,8 @@ except ImportError:
     print("Warning: sentence-transformers not installed. Run: pip install sentence-transformers")
 
 
-# Default model - BGE base Chinese, works well for both Chinese and English
-DEFAULT_MODEL = 'BAAI/bge-base-zh-v1.5'
+# BGE-M3: multilingual model, works well for English academic papers
+DEFAULT_MODEL = 'BAAI/bge-m3'
 
 
 class SemanticSearch:
