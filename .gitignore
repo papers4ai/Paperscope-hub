@@ -15,10 +15,17 @@ env/
 *.swo
 
 # Data
+output/progress.json
+output/embeddings.npy
 output/*.json
 output/*.csv
 output/*.xml
 !output/.gitkeep
+!output/papers.json
+!output/papers_*.json
+!output/papers_*.csv
+!output/feed.xml
+!output/statistics.json
 
 # Mac
 .DS_Store
