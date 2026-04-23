@@ -37,4 +37,7 @@ output/embeddings.npy
 
 # Environment
 .env
-.env.local.claude/worktrees/
+.env.local
+
+# Claude worktrees
+.claude/worktrees/
