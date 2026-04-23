@@ -17,7 +17,7 @@ ARXIV_API_URL = "https://export.arxiv.org/api/query"
 
 
 class ArxivScraper:
-    def __init__(self, delay: float = 5.0):
+    def __init__(self, delay: float = 15.0):  # 增加到 15 秒
         self.delay = delay
         self.progress_file = "output/progress.json"
 

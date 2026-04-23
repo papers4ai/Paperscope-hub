@@ -63,62 +63,37 @@ def clean_paper(paper: dict) -> dict:
     }
 
 
-def check_domain(title: str, abstract: str, domain: str) -> Tuple[bool, List[str]]:
-    """Check if paper belongs to a domain and return matched keywords"""
+def check_domains_all(title: str, abstract: str) -> Tuple[List[str], Dict[str, List[str]]]:
+    """Check all domains at once (single pass through text)"""
     text = f"{title} {abstract}"
-    patterns = _PATTERNS.get(domain, [])
-
-    matched = []
-    for pattern in patterns:
-        if pattern.search(text):
-            matched.append(pattern.pattern)
-
-    return len(matched) > 0, matched
-
-
-def classify_domains(paper: dict) -> dict:
-    """Classify paper into domains"""
-    title = paper.get("title", "")
-    abstract = paper.get("abstract", "")
 
     domains = []
     domain_keywords = {}
 
     for domain in ["world_model", "physical_ai", "medical_ai"]:
-        is_match, keywords = check_domain(title, abstract, domain)
-        if is_match:
+        patterns = _PATTERNS.get(domain, [])
+        matched = [p.pattern for p in patterns if p.search(text)]
+        if matched:
             domains.append(domain)
-            domain_keywords[domain] = keywords
+            domain_keywords[domain] = matched
 
-    paper["_domains"] = domains
-    paper["_domain_keywords"] = domain_keywords
-
-    return paper
+    return domains, domain_keywords
 
 
-def tag_tasks(paper: dict) -> dict:
-    """Tag paper with task labels"""
-    title = paper.get("title", "")
-    abstract = paper.get("abstract", "")
+def tag_tasks_all(title: str, abstract: str) -> Tuple[List[str], Dict[str, List[str]]]:
+    """Tag all tasks at once (single pass)"""
     text = f"{title} {abstract}"
 
     matched_tasks = []
     task_details = {}
 
     for abbr, patterns in _TASK_PATTERNS.items():
-        keywords = []
-        for pattern in patterns:
-            if pattern.search(text):
-                keywords.append(pattern.pattern)
-
-        if keywords:
+        matched = [p.pattern for p in patterns if p.search(text)]
+        if matched:
             matched_tasks.append(abbr)
-            task_details[abbr] = keywords
+            task_details[abbr] = matched
 
-    paper["_tasks"] = matched_tasks
-    paper["_task_details"] = task_details
-
-    return paper
+    return matched_tasks, task_details
 
 
 def extract_code_links(text: str) -> List[str]:
@@ -218,11 +193,11 @@ def clean_papers(papers: list) -> list:
         # Clean basic fields
         paper = clean_paper(paper)
 
-        # Extract code links (search in both title and abstract)
+        # Extract code links
         text = f"{paper.get('title', '')} {paper.get('abstract', '')}"
         code_links = extract_code_links(text)
         paper["code"] = code_links[0] if code_links else ""
-        paper["has_code"] = len(code_links) > 0  # Flag for frontend
+        paper["has_code"] = len(code_links) > 0
 
         # Extract publication venue
         paper["publication"] = extract_publication(paper.get("title", ""))
@@ -230,18 +205,20 @@ def clean_papers(papers: list) -> list:
         # Extract month
         paper["month"] = extract_month(paper.get("published", ""))
 
-        # Classify paper type (Method/Dataset/Survey)
+        # Classify paper type
         title = paper.get("title", "")
         abstract = paper.get("abstract", "")
         paper["type"] = classify_paper_type(title, abstract)
 
-        # Classify domains
-        paper = classify_domains(paper)
+        # Classify domains and tag tasks in one pass
+        domains, domain_keywords = check_domains_all(title, abstract)
+        paper["_domains"] = domains
+        paper["_domain_keywords"] = domain_keywords
 
-        # Tag tasks
-        paper = tag_tasks(paper)
+        tasks, task_details = tag_tasks_all(title, abstract)
+        paper["_tasks"] = tasks
+        paper["_task_details"] = task_details
 
-        # Keep all papers (no filtering) - search query already filters relevant papers
         cleaned.append(paper)
 
     return cleaned

@@ -1,5 +1,17 @@
 {
   "tasks": {
+    "WorldModel": {
+      "zh": "世界模型核心",
+      "en": "World Model Core"
+    },
+    "ActionModel": {
+      "zh": "动作/行为模型",
+      "en": "Action Model"
+    },
+    "FoundationModel": {
+      "zh": "基础大模型",
+      "en": "Foundation Model"
+    },
     "VidGen": {
       "zh": "视频生成/预测",
       "en": "Video Generation"
@@ -23,6 +35,10 @@
     "Predictive": {
       "zh": "预测学习",
       "en": "Predictive Learning"
+    },
+    "DiffusionWM": {
+      "zh": "扩散世界模型",
+      "en": "Diffusion World Model"
     },
     "PINN": {
       "zh": "物理信息网络",
@@ -91,12 +107,16 @@
   },
   "domain_tasks": {
     "world_model": [
+      "WorldModel",
+      "ActionModel",
+      "FoundationModel",
       "VidGen",
       "NeRF",
       "MBRL",
       "Sim2Real",
       "EmbodiedWM",
-      "Predictive"
+      "Predictive",
+      "DiffusionWM"
     ],
     "physical_ai": [
       "PINN",

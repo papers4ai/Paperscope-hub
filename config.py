@@ -82,35 +82,62 @@ DOMAINS = {
 
 TASK_DEFINITIONS = {
     # ==================== World Model ====================
+    "WorldModel": ("世界模型核心", [
+        r"world\s*model", r"world\s*representation", r"learned\s*simulator",
+        r"internal\s*world", r"world\s*understanding", r"generative\s*world",
+        r"actionable\s*model", r"world\s*action\s*model",
+    ]),
+    "ActionModel": ("动作/行为模型", [
+        r"action\s*model", r"world\s*action", r"actionable\s*representation",
+        r"action\s*prediction", r"action\s*conditioned", r"action\s*grounding",
+        r"behavior\s*model", r"affordance", r"action\s*understanding",
+    ]),
+    "FoundationModel": ("基础大模型", [
+        r"foundation\s*model", r"foundation\s*models",
+        r"large\s*language\s*model", r"\bLLM\b", r"\bVLM\b",
+        r"vision\s*language\s*model", r"multimodal\s*large",
+        r"general\s*purpose\s*model", r"pretrained\s*model",
+    ]),
     "VidGen": ("视频生成/预测", [
         r"video\s*generation", r"video\s*prediction", r"future\s*frame",
         r"frame\s*interpolation", r"motion\s*prediction", r"temporal\s*generation",
-        r"video\s*diffusion", r"video\s*model", r"vdm", r"\bIVA\b"
+        r"video\s*diffusion", r"video\s*model", r"vdm", r"\bIVA\b",
+        r"next\s*frame", r"video\s*synthesis", r"video\s*forecasting",
     ]),
     "NeRF": ("神经辐射场/3DGS", [
         r"neural\s*radiance", r"\bnerf\b", r"\bNeRF\b", r"gaussian\s*splatting",
         r"3dgs", r"novel\s*view", r"scene\s*reconstruction", r"view\s*synthesis",
-        r"implicit\s*scene", r"volumetric\s*rendering"
+        r"implicit\s*scene", r"volumetric\s*rendering",
+        r"4d\s*gaussian", r"dynamic\s*gaussian", r"3d\s*generation",
     ]),
     "MBRL": ("基于模型的RL", [
         r"model[-\s]?based\s*reinforcement", r"model\s*predictive\s*control",
         r"\bMPC\b", r"dreamer", r"\bPlaNet\b", r"\bRSSM\b",
-        r"latent\s*dynamics", r"planning\s*robot", r"model\s*learning"
+        r"latent\s*dynamics", r"planning\s*robot", r"model\s*learning",
+        r"world\s*model\s*rl", r"learned\s*dynamics",
     ]),
     "Sim2Real": ("Sim-to-Real", [
         r"sim[-\s]?to[-\s]?real", r"sim2real", r"simulation",
         r"domain\s*randomization", r"simulated\s*environment",
-        r"reality\s*gap", r"simulated\s*to\s*real"
+        r"reality\s*gap", r"simulated\s*to\s*real",
+        r"real\s*to\s*sim", r"real2sim",
     ]),
     "EmbodiedWM": ("具身世界模型", [
         r"embodied\s*world\s*model", r"visual\s*navigation",
         r"object\s*navigation", r"pointgoal", r"embodied\s*agent",
-        r"interactive\s*perception", r"world\s*model\s*robot"
+        r"interactive\s*perception", r"world\s*model\s*robot",
+        r"embodied\s*planning", r"embodied\s*decision",
     ]),
     "Predictive": ("预测学习", [
         r"predictive\s*coding", r"predictive\s*model", r"forward\s*model",
         r"temporal\s*prediction", r"future\s*prediction",
-        r"predictive\s*representation", r"masked\s*autoencoder"
+        r"predictive\s*representation", r"masked\s*autoencoder",
+        r"self\s*supervised\s*prediction", r"contrastive\s*prediction",
+    ]),
+    "DiffusionWM": ("扩散世界模型", [
+        r"diffusion\s*world", r"diffusion\s*model",
+        r"denoising\s*diffusion", r"ddpm", r"ddim",
+        r"score\s*based\s*generative", r"diffusion\s*planning",
     ]),
 
     # ==================== Physical AI ====================
@@ -340,12 +367,18 @@ MEDICAL_AI_KEYWORDS = [
 # ============================================================
 
 TASK_EN_LABELS = {
-    "VidGen":     "Video Generation",
-    "NeRF":       "NeRF / 3D Gaussian",
-    "MBRL":       "Model-Based RL",
-    "Sim2Real":   "Sim-to-Real",
-    "EmbodiedWM": "Embodied World Model",
-    "Predictive": "Predictive Learning",
+    # World Model
+    "WorldModel":     "World Model Core",
+    "ActionModel":    "Action Model",
+    "FoundationModel": "Foundation Model",
+    "VidGen":         "Video Generation",
+    "NeRF":           "NeRF / 3D Gaussian",
+    "MBRL":           "Model-Based RL",
+    "Sim2Real":       "Sim-to-Real",
+    "EmbodiedWM":     "Embodied World Model",
+    "Predictive":     "Predictive Learning",
+    "DiffusionWM":    "Diffusion World Model",
+    # Physical AI
     "PINN":       "Physics-Informed NN",
     "NeuralOp":   "Neural Operator",
     "Embodied":   "Embodied AI",
@@ -353,6 +386,7 @@ TASK_EN_LABELS = {
     "FluidSim":   "Fluid Simulation",
     "Climate":    "Climate Prediction",
     "3DRecon":    "3D Reconstruction",
+    # Medical AI
     "Pathology":  "Pathology AI",
     "MedImg":     "Medical Imaging",
     "Cancer":     "Cancer Diagnosis",
@@ -366,12 +400,18 @@ TASK_EN_LABELS = {
 
 # 任务 → 所属领域（用于动态生成 domain_tasks 映射）
 TASK_DOMAIN_MAP = {
-    "VidGen":     "world_model",
-    "NeRF":       "world_model",
-    "MBRL":       "world_model",
-    "Sim2Real":   "world_model",
-    "EmbodiedWM": "world_model",
-    "Predictive": "world_model",
+    # World Model
+    "WorldModel":     "world_model",
+    "ActionModel":    "world_model",
+    "FoundationModel": "world_model",
+    "VidGen":         "world_model",
+    "NeRF":           "world_model",
+    "MBRL":           "world_model",
+    "Sim2Real":       "world_model",
+    "EmbodiedWM":     "world_model",
+    "Predictive":     "world_model",
+    "DiffusionWM":    "world_model",
+    # Physical AI
     "PINN":       "physical_ai",
     "NeuralOp":   "physical_ai",
     "Embodied":   "physical_ai",
@@ -379,6 +419,7 @@ TASK_DOMAIN_MAP = {
     "FluidSim":   "physical_ai",
     "Climate":    "physical_ai",
     "3DRecon":    "physical_ai",
+    # Medical AI
     "Pathology":  "medical_ai",
     "MedImg":     "medical_ai",
     "Cancer":     "medical_ai",

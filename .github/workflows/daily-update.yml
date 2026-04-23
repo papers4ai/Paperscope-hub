@@ -40,11 +40,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # ── 仅定时 / 手动触发时才爬取 arXiv ──
-      # main.py 自动判断：有历史缓存 → 只抓最近30天；首次 → 全量抓取
+      # ── 抓取论文（自动更新关键词 + 抓取）──
       - name: Fetch new papers (scheduled / manual only)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: python main.py
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: python main.py --update-keywords
 
       # ── Pipeline ──
       # Push 触发：跳过 arXiv 抓取 + 跳过 GLM trending（用缓存），快速部署
@@ -65,8 +68,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add output/
-          git diff --cached --quiet || git commit -m "chore: update papers $(date +%Y-%m-%d)"
+          git add output/ keywords.json
+          git diff --cached --quiet || git commit -m "chore: update papers and keywords $(date +%Y-%m-%d)"
           git pull --rebase origin main
           git push origin main
 

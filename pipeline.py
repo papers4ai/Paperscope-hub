@@ -147,59 +147,73 @@ Return ONLY valid JSON, no explanation:
 ]"""
 
 
+def _call_llm_for_domain(domain: str, papers: list, months: int, top_n: int,
+                          client, model: str) -> tuple:
+    """Single LLM call for one domain (for parallel execution)."""
+    if not papers:
+        return domain, []
+
+    sample = papers[:80]
+    papers_text = "\n".join(
+        f"[{i+1}] {p.get('title', '')}. {p.get('abstract', '')[:200]}"
+        for i, p in enumerate(sample)
+    )
+    prompt = _TRENDING_PROMPT.format(
+        n=len(sample),
+        domain_label=_DOMAIN_LABELS.get(domain, domain),
+        months=months,
+        top_n=top_n,
+        papers_text=papers_text,
+    )
+    try:
+        resp = client.chat.completions.create(
+            model=model,
+            max_tokens=1000,
+            temperature=0.2,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = resp.choices[0].message.content.strip()
+        if "```" in text:
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:]
+            text = text.split("```")[0].strip()
+        items = json.loads(text)
+        result = [
+            {
+                "term":        item["topic"].lower().replace(" ", "_"),
+                "display":     item["topic"],
+                "count":       int(item.get("count", 0)),
+                "description": item.get("description", ""),
+                "source":      "llm",
+            }
+            for item in items[:top_n]
+            if item.get("topic") and item.get("count", 0) > 0
+        ]
+        logger.info(f"  LLM trending {domain}: {len(result)} topics")
+        return domain, result
+    except Exception as e:
+        logger.warning(f"  LLM trending failed for {domain}: {e}")
+        return domain, []
+
+
 def _llm_trending(papers_by_domain: dict, months: int, top_n: int,
                   client, model: str) -> dict:
-    """Use LLM to extract trending topics from recent papers per domain."""
-    import time
-    result = {}
-    for domain, papers in papers_by_domain.items():
-        if not papers:
-            result[domain] = []
-            continue
+    """Use LLM to extract trending topics from recent papers per domain (parallel)."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        # Sample max 80 papers to stay within token budget
-        sample = papers[:80]
-        papers_text = "\n".join(
-            f"[{i+1}] {p.get('title', '')}. {p.get('abstract', '')[:200]}"
-            for i, p in enumerate(sample)
-        )
-        prompt = _TRENDING_PROMPT.format(
-            n=len(sample),
-            domain_label=_DOMAIN_LABELS.get(domain, domain),
-            months=months,
-            top_n=top_n,
-            papers_text=papers_text,
-        )
-        try:
-            resp = client.chat.completions.create(
-                model=model,
-                max_tokens=1000,
-                temperature=0.2,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            text = resp.choices[0].message.content.strip()
-            if "```" in text:
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-                text = text.split("```")[0].strip()
-            items = json.loads(text)
-            result[domain] = [
-                {
-                    "term":        item["topic"].lower().replace(" ", "_"),
-                    "display":     item["topic"],
-                    "count":       int(item.get("count", 0)),
-                    "description": item.get("description", ""),
-                    "source":      "llm",
-                }
-                for item in items[:top_n]
-                if item.get("topic") and item.get("count", 0) > 0
-            ]
-            logger.info(f"  LLM trending {domain}: {len(result[domain])} topics")
-        except Exception as e:
-            logger.warning(f"  LLM trending failed for {domain}: {e} — will use n-gram fallback")
-            result[domain] = []
-        time.sleep(1)
+    result = {d: [] for d in papers_by_domain}
+
+    # 并行调用所有 domain
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(_call_llm_for_domain, domain, papers, months, top_n, client, model): domain
+            for domain, papers in papers_by_domain.items() if papers
+        }
+        for future in as_completed(futures):
+            domain, topics = future.result()
+            result[domain] = topics
+
     return result
 
 
