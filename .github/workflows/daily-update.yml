@@ -40,12 +40,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # ── 仅定时 / 手动触发时才爬取 arXiv（避免 IP 限速，Push 跳过）──
+      # ── 仅定时 / 手动触发时才爬取 arXiv ──
+      # main.py 自动判断：有历史缓存 → 只抓最近30天；首次 → 全量抓取
       - name: Fetch new papers (scheduled / manual only)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: python main.py --update
+        run: python main.py
 
-      # ── Pipeline：定时用 progress.json，Push 用已提交的 papers.json ──
+      # ── Pipeline ──
+      # Push 触发：跳过 arXiv 抓取 + 跳过 GLM trending（用缓存），快速部署
+      # 定时触发：完整运行，含 GLM trending 重计算
       - name: Run pipeline
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
@@ -53,7 +56,7 @@ jobs:
           LLM_MODEL: ${{ vars.LLM_MODEL }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            python pipeline.py --input output/papers.json
+            python pipeline.py --input output/papers.json --skip-trending
           else
             python pipeline.py
           fi

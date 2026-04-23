@@ -1,8 +1,8 @@
 """
-Main entry point for paper fetching
-- 使用多个搜索查询以获取更多论文
-- 默认并行抓取所有年份
-- 自动增量更新（只抓取缺失的年份）
+arXiv paper fetcher — smart incremental mode
+  首次运行（无历史数据）: 全量抓取 START_YEAR ~ 今年，按年并行
+  后续运行（有历史数据）: 只抓最近 FETCH_RECENT_DAYS 天，速度快、降低限速风险
+  --full : 强制全量重抓（用于恢复/修复）
 """
 
 import argparse
@@ -11,136 +11,145 @@ import logging
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
-# Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from config import SEARCH_QUERIES, START_YEAR, MAX_RESULTS
+from config import SEARCH_QUERIES, START_YEAR, MAX_RESULTS, FETCH_RECENT_DAYS
 from config_search import ArxivScraper
 
-# 动态获取当前年份
 END_YEAR = datetime.now().year
 OUTPUT_DIR = "output"
-PARALLEL_WORKERS = 3  # 并行抓取年份数
+PARALLEL_WORKERS = 3
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def fetch_query_year(args_tuple):
-    """Fetch papers for a single query + year"""
-    query, year, max_results, delay = args_tuple
-    scraper = ArxivScraper(delay=delay)
-    full_query = f"{query} AND submittedDate:[{year}0101 TO {year}1231]"
-    papers = scraper.fetch_all(full_query, max_total=max_results)
-    return query[:30], year, papers
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+def load_existing_papers() -> dict:
+    """Load cached papers from progress.json → {id: paper}"""
+    path = os.path.join(OUTPUT_DIR, "progress.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        papers = {p["id"]: p for p in data.get("papers", [])}
+        logger.info(f"Loaded {len(papers)} existing papers from cache")
+        return papers
+    except Exception as e:
+        logger.warning(f"Could not load progress.json: {e}")
+        return {}
 
 
-def load_existing_papers():
-    """Load existing papers from previous runs"""
-    progress_file = os.path.join(OUTPUT_DIR, "progress.json")
-
-    existing = {}
-    if os.path.exists(progress_file):
-        try:
-            with open(progress_file, 'r') as f:
-                data = json.load(f)
-                for p in data.get("papers", []):
-                    existing[p["id"]] = p
-            logger.info(f"Loaded {len(existing)} existing papers")
-        except Exception as e:
-            logger.warning(f"Could not load progress.json: {e}")
-
-    return existing
-
-
-def save_papers(papers):
-    """Save papers to progress.json"""
+def save_papers(papers: list):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    progress = {
-        "last_update": datetime.now().isoformat(),
-        "papers": papers
-    }
-    with open(os.path.join(OUTPUT_DIR, "progress.json"), 'w') as f:
-        json.dump(progress, f, indent=2)
-
-    logger.info(f"Saved {len(papers)} papers")
+    with open(os.path.join(OUTPUT_DIR, "progress.json"), "w") as f:
+        json.dump({"last_update": datetime.now().isoformat(), "papers": papers}, f, indent=2)
+    logger.info(f"Saved {len(papers)} papers to cache")
 
 
-def main(force_update_current_year: bool = False):
-    base_queries = SEARCH_QUERIES
+# ── fetch strategies ──────────────────────────────────────────────────────────
 
-    # 加载已有论文
-    existing_papers = load_existing_papers()
+def _fetch_one(args_tuple):
+    """Worker: fetch papers for one (query, date_filter) pair."""
+    query, date_filter, max_results, delay = args_tuple
+    scraper = ArxivScraper(delay=delay)
+    full_query = f"({query}) AND {date_filter}"
+    papers = scraper.fetch_all(full_query, max_total=max_results)
+    return query[:40], papers
 
-    # 检查已有论文的年份
-    existing_years = set()
-    for p in existing_papers.values():
-        if 'published' in p:
-            try:
-                year = int(p['published'][:4])
-                existing_years.add(year)
-            except:
-                pass
 
-    # 需要抓取的年份（缺失的年份）
-    # 当前年份始终重新抓取以获取最新论文（--update 时也强制重抓）
+def fetch_recent(existing: dict, days: int = FETCH_RECENT_DAYS) -> dict:
+    """Incremental: fetch only the last `days` days across all queries."""
+    cutoff = (date.today() - timedelta(days=days)).strftime("%Y%m%d")
+    today  = date.today().strftime("%Y%m%d")
+    date_filter = f"submittedDate:[{cutoff} TO {today}]"
+
+    logger.info(f"Incremental fetch: last {days} days ({cutoff} → {today})")
+    logger.info(f"Queries: {len(SEARCH_QUERIES)}")
+
+    all_papers = existing.copy()
+    tasks = [(q, date_filter, 2000, 3.0) for q in SEARCH_QUERIES]
+
+    with ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as executor:
+        futures = {executor.submit(_fetch_one, t): t[0] for t in tasks}
+        for future in as_completed(futures):
+            label, papers = future.result()
+            new = sum(1 for p in papers if p["id"] not in all_papers)
+            for p in papers:
+                all_papers[p["id"]] = p          # always overwrite with latest
+            logger.info(f"  '{label}…': {len(papers)} fetched, {new} new")
+
+    return all_papers
+
+
+def fetch_full(existing: dict) -> dict:
+    """Full fetch: all years from START_YEAR to now, one year at a time."""
+    # Detect which years are already complete
+    existing_years: set = set()
+    for p in existing.values():
+        try:
+            existing_years.add(int(p["published"][:4]))
+        except Exception:
+            pass
+
     all_years = list(range(START_YEAR, END_YEAR + 1))
     years_to_fetch = [y for y in all_years if y not in existing_years]
-    if END_YEAR not in years_to_fetch and (force_update_current_year or END_YEAR in existing_years):
+    # Always re-fetch current year (may have new papers)
+    if END_YEAR not in years_to_fetch:
         years_to_fetch.append(END_YEAR)
-        logger.info(f"Will re-fetch current year {END_YEAR} for latest papers")
 
-    if not years_to_fetch:
-        logger.info(f"All years already fetched. Total papers: {len(existing_papers)}")
-        return list(existing_papers.values())
+    logger.info(f"Full fetch: years {years_to_fetch}")
+    all_papers = existing.copy()
 
-    logger.info(f"Fetching years: {years_to_fetch}")
-    logger.info(f"Using {len(base_queries)} search queries per year")
-
-    # 合并已有论文和新抓取的论文
-    all_papers = existing_papers.copy()
-
-    # 为每个查询+年份组合创建任务
-    # 先按年份分组，每年内并行执行多个查询
     for year in years_to_fetch:
-        logger.info(f"=== Fetching year {year} ===")
-        tasks = [(query, year, MAX_RESULTS, 3.0) for query in base_queries]
-        year_papers = {}
+        logger.info(f"=== Year {year} ===")
+        date_filter = f"submittedDate:[{year}0101 TO {year}1231]"
+        tasks = [(q, date_filter, MAX_RESULTS, 3.0) for q in SEARCH_QUERIES]
+        year_new = 0
 
         with ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as executor:
-            futures = {executor.submit(fetch_query_year, task): task[0] for task in tasks}
-
+            futures = {executor.submit(_fetch_one, t): t[0] for t in tasks}
             for future in as_completed(futures):
-                query_short, _, papers = future.result()
-                if papers:
-                    new_count = 0
-                    for p in papers:
-                        if p['id'] not in all_papers:
-                            all_papers[p['id']] = p
-                            year_papers[p['id']] = p
-                            new_count += 1
-                    logger.info(f"  Query '{query_short}...': {len(papers)} papers ({new_count} new)")
-                else:
-                    logger.info(f"  Query '{query_short}...': 0 papers")
+                label, papers = future.result()
+                new = 0
+                for p in papers:
+                    if p["id"] not in all_papers:
+                        all_papers[p["id"]] = p
+                        new += 1
+                year_new += new
+                logger.info(f"  '{label}…': {len(papers)} fetched, {new} new")
 
-        logger.info(f"Year {year} done: got {len(year_papers)} new papers")
+        logger.info(f"Year {year} done: {year_new} new papers")
 
-    # 保存
+    return all_papers
+
+
+# ── main ──────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(description="Fetch papers from arXiv")
+    parser.add_argument("--full", action="store_true",
+                        help="Force full refetch (all years). Default: incremental if cache exists.")
+    args = parser.parse_args()
+
+    existing = load_existing_papers()
+
+    if existing and not args.full:
+        # Have history → incremental (last 30 days)
+        all_papers = fetch_recent(existing)
+    else:
+        # First run or --full → fetch all years
+        all_papers = fetch_full(existing)
+
     papers_list = list(all_papers.values())
     save_papers(papers_list)
-
-    logger.info(f"Done! Total: {len(papers_list)} papers")
+    logger.info(f"Done. Total papers in cache: {len(papers_list)}")
     return papers_list
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetch papers from arXiv")
-    parser.add_argument("--update", action="store_true", help="Force re-fetch current year for new papers")
-    args = parser.parse_args()
-    main(force_update_current_year=args.update)
+    main()

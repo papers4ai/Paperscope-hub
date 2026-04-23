@@ -106,11 +106,111 @@ def export_task_meta(output_dir: str):
     logger.info(f"Exported task_meta.json: {len(tasks)} tasks across {sum(len(v) for v in domain_tasks.values())} domain slots")
 
 
-def compute_trending(papers: list, output_dir: str, months: int = 6, top_n: int = 8):
+def _get_llm_client():
+    """Return (client, model) if LLM_API_KEY is set, else (None, None)."""
+    api_key = os.environ.get("LLM_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return None, None
+    try:
+        from openai import OpenAI
+        base_url = os.environ.get("LLM_BASE_URL", "https://open.bigmodel.cn/api/paas/v4")
+        model = os.environ.get("LLM_MODEL", "glm-4-flash")
+        return OpenAI(api_key=api_key, base_url=base_url), model
+    except ImportError:
+        return None, None
+
+
+_DOMAIN_LABELS = {
+    "world_model": "World Model / Video Generation / 3D Scene Understanding",
+    "physical_ai": "Physical AI / Physics-Informed ML / Robotics / Fluid Simulation",
+    "medical_ai":  "Medical AI / Medical Imaging / Drug Discovery / Clinical Decision",
+}
+
+_TRENDING_PROMPT = """\
+You are analyzing {n} research papers from the **{domain_label}** field \
+published in the last {months} months.
+
+Paper list (title + first 200 chars of abstract):
+{papers_text}
+
+Task: Identify the top {top_n} trending research directions/topics.
+Rules:
+- Each topic name: 2-4 words, Title Case, English
+- Topics must be distinct and non-overlapping
+- count = approximate number of papers in this topic (from the {n} above)
+- Sort by count descending
+
+Return ONLY valid JSON, no explanation:
+[
+  {{"topic": "Gaussian Splatting", "count": 34, "description": "3D scene reconstruction using Gaussian primitives"}},
+  ...
+]"""
+
+
+def _llm_trending(papers_by_domain: dict, months: int, top_n: int,
+                  client, model: str) -> dict:
+    """Use LLM to extract trending topics from recent papers per domain."""
+    import time
+    result = {}
+    for domain, papers in papers_by_domain.items():
+        if not papers:
+            result[domain] = []
+            continue
+
+        # Sample max 80 papers to stay within token budget
+        sample = papers[:80]
+        papers_text = "\n".join(
+            f"[{i+1}] {p.get('title', '')}. {p.get('abstract', '')[:200]}"
+            for i, p in enumerate(sample)
+        )
+        prompt = _TRENDING_PROMPT.format(
+            n=len(sample),
+            domain_label=_DOMAIN_LABELS.get(domain, domain),
+            months=months,
+            top_n=top_n,
+            papers_text=papers_text,
+        )
+        try:
+            resp = client.chat.completions.create(
+                model=model,
+                max_tokens=1000,
+                temperature=0.2,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = resp.choices[0].message.content.strip()
+            if "```" in text:
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+                text = text.split("```")[0].strip()
+            items = json.loads(text)
+            result[domain] = [
+                {
+                    "term":        item["topic"].lower().replace(" ", "_"),
+                    "display":     item["topic"],
+                    "count":       int(item.get("count", 0)),
+                    "description": item.get("description", ""),
+                    "source":      "llm",
+                }
+                for item in items[:top_n]
+                if item.get("topic") and item.get("count", 0) > 0
+            ]
+            logger.info(f"  LLM trending {domain}: {len(result[domain])} topics")
+        except Exception as e:
+            logger.warning(f"  LLM trending failed for {domain}: {e} — will use n-gram fallback")
+            result[domain] = []
+        time.sleep(1)
+    return result
+
+
+def compute_trending(papers: list, output_dir: str, months: int = 6, top_n: int = 8,
+                     client=None, model: str = None):
     """
-    Extract truly trending phrases from recent paper titles+abstracts per domain.
-    Uses domain-specificity scoring so generic ML terms (e.g. 'latent space') are
-    ranked below phrases that are distinctive to a particular domain.
+    Compute trending topics per domain and write output/trending.json.
+
+    Strategy (in priority order):
+      1. GLM/LLM  — if client is provided; extracts semantic topics from abstracts
+      2. N-gram    — fallback; extracts high-frequency domain-specific bigrams/trigrams
     """
     import re
     from collections import Counter
@@ -120,6 +220,29 @@ def compute_trending(papers: list, output_dir: str, months: int = 6, top_n: int 
     recent = [p for p in papers if p.get("published", "") >= cutoff]
     if not recent:
         recent = sorted(papers, key=lambda x: x.get("published", ""), reverse=True)[:800]
+
+    domains = ["world_model", "physical_ai", "medical_ai"]
+    papers_by_domain = {
+        d: [p for p in recent if d in p.get("_domains", [])]
+        for d in domains
+    }
+
+    # ── Strategy 1: LLM (GLM) ───────────────────────────────────────────────
+    if client:
+        logger.info(f"Computing trending topics via LLM ({model})")
+        llm_result = _llm_trending(papers_by_domain, months, top_n, client, model)
+
+        # Fill missing domains with n-gram fallback (if LLM call failed)
+        missing_domains = [d for d in domains if not llm_result.get(d)]
+        if not missing_domains:
+            _save_trending(llm_result, months, output_dir)
+            return
+
+        logger.info(f"N-gram fallback for: {missing_domains}")
+    else:
+        logger.info("LLM_API_KEY not set — using n-gram trending")
+        llm_result = {d: [] for d in domains}
+        missing_domains = domains
 
     STOP = {
         "a", "an", "the", "and", "or", "of", "in", "on", "at", "to", "for",
@@ -177,22 +300,22 @@ def compute_trending(papers: list, output_dir: str, months: int = 6, top_n: int 
                     counter[" ".join(toks[i: i + n])] += 1
         return counter
 
-    domains = ["world_model", "physical_ai", "medical_ai"]
+    # ── Strategy 2: N-gram (fallback) ───────────────────────────────────────
     # Title weighted 2× to surface concise topic phrases
     domain_texts = {
         d: [f"{p.get('title','')} {p.get('title','')} {p.get('abstract','')[:400]}"
-            for p in recent if d in p.get("_domains", [])]
-        for d in domains
+            for p in papers_by_domain[d]]
+        for d in missing_domains
     }
-    domain_counts = {d: max(len(domain_texts[d]), 1) for d in domains}
+    domain_counts = {d: max(len(domain_texts[d]), 1) for d in missing_domains}
     domain_ngrams = {d: _ngrams(domain_texts[d]) for d in domains}
 
     all_texts = [t for ts in domain_texts.values() for t in ts]
     all_ngrams = _ngrams(all_texts)
     total = max(len(all_texts), 1)
 
-    result = {}
-    for domain in domains:
+    ngram_result = {}
+    for domain in missing_domains:
         n_papers = domain_counts[domain]
         candidates = []
         for gram, freq in domain_ngrams[domain].most_common(1000):
@@ -244,17 +367,23 @@ def compute_trending(papers: list, output_dir: str, months: int = 6, top_n: int 
             if len(deduped) >= top_n:
                 break
 
-        result[domain] = deduped
+        ngram_result[domain] = deduped
 
+    # Merge LLM results and n-gram fallback results
+    final_result = {**llm_result, **ngram_result}
+    _save_trending(final_result, months, output_dir)
+
+
+def _save_trending(trends: dict, months: int, output_dir: str):
     out = {
         "generated": datetime.now().isoformat()[:10],
         "months": months,
-        "trends": result,
+        "trends": trends,
     }
     with open(f"{output_dir}/trending.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
     logger.info(
-        "Computed trending: " + ", ".join(f"{d}:{len(result[d])}" for d in domains)
+        "Trending saved: " + ", ".join(f"{d}:{len(trends.get(d,[]))}" for d in trends)
     )
 
 
@@ -297,6 +426,9 @@ def main():
     parser = argparse.ArgumentParser(description="Process papers")
     parser.add_argument("--input", default="output/papers_raw.json")
     parser.add_argument("--output-dir", default="output")
+    parser.add_argument("--skip-trending", action="store_true",
+                        help="Skip trending recomputation (reuse cached trending.json). "
+                             "Used for fast push-triggered deploys.")
     args = parser.parse_args()
 
     # Load raw papers - check progress.json first, then papers_raw.json
@@ -339,8 +471,12 @@ def main():
     # Export task metadata for dynamic frontend rendering
     export_task_meta(args.output_dir)
 
-    # Compute trending topics from recent paper abstracts
-    compute_trending(papers, args.output_dir)
+    # Compute trending topics (GLM if key available, else n-gram)
+    if args.skip_trending and os.path.exists(f"{args.output_dir}/trending.json"):
+        logger.info("--skip-trending: reusing cached trending.json")
+    else:
+        client, model = _get_llm_client()
+        compute_trending(papers, args.output_dir, client=client, model=model)
 
     # Save statistics
     with open(f"{args.output_dir}/statistics.json", 'w') as f:

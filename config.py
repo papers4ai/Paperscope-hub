@@ -8,30 +8,37 @@
 # ============================================================
 
 # 分开搜索以避免URL过长和获取更多结果
+# 每个查询都加了 cat: 类别过滤，确保爬取前就锁定目标领域，减少无关论文
+# 格式：(关键词条件) AND (cat:领域1 OR cat:领域2 ...)
 SEARCH_QUERIES = [
-    # World Model 相关
-    'ti:"world model" OR abs:"world model"',
-    'ti:"video generation" OR ti:"video prediction" OR ti:"video diffusion"',
-    'ti:nerf OR ti:"neural radiance" OR ti:"gaussian splatting"',
-    'ti:"model-based reinforcement" OR ti:"model predictive control" OR ti:MPC',
-    'ti:"sim-to-real" OR ti:"sim2real" OR ti:simulation',
-    # Physical AI 相关
-    'ti:"physics informed" OR ti:PINN OR ti:"neural operator"',
-    'ti:"neural ODE" OR ti:"deep operator" OR ti:FNO',
-    'ti:robot OR ti:robotics OR ti:manipulation',
-    'ti:grasping OR ti:"embodied AI" OR ti:"embodied agent"',
-    'ti:fluid OR ti:turbulence OR ti:"climate model"',
-    # Medical AI 相关
-    'ti:"medical imaging" OR ti:radiology OR ti:ultrasound',
-    'ti:pathology OR ti:histopathology OR ti:"whole slide"',
-    'ti:"cancer detection" OR ti:"tumor detection" OR ti:lesion',
-    'ti:"drug discovery" OR ti:"drug design" OR ti:"molecular generation"',
-    'ti:"protein folding" OR ti:alphafold OR ti:"protein structure"',
-    'ti:"clinical AI" OR ti:"clinical decision" OR ti:diagnosis',
+    # ── World Model ──────────────────────────────────────────────────────
+    '(ti:"world model" OR abs:"world model") AND (cat:cs.LG OR cat:cs.CV OR cat:cs.AI OR cat:cs.RO)',
+    '(ti:"video generation" OR ti:"video prediction" OR ti:"video diffusion") AND (cat:cs.CV OR cat:cs.LG)',
+    '(ti:"neural radiance" OR ti:"gaussian splatting" OR ti:NeRF) AND cat:cs.CV',
+    '(ti:"model-based reinforcement" OR ti:"model predictive control") AND (cat:cs.LG OR cat:cs.RO OR cat:cs.SY)',
+    '(ti:"sim-to-real" OR ti:sim2real OR ti:"embodied agent") AND (cat:cs.RO OR cat:cs.LG OR cat:cs.AI)',
+
+    # ── Physical AI ──────────────────────────────────────────────────────
+    '(ti:"physics informed" OR ti:PINN OR ti:"physics-informed") AND (cat:cs.LG OR cat:cs.NA OR cat:cs.CE)',
+    '(ti:"neural operator" OR ti:FNO OR ti:"deep operator" OR ti:"neural ODE") AND (cat:cs.LG OR cat:cs.NA)',
+    '(ti:robot OR ti:robotics OR ti:manipulation OR ti:grasping) AND (cat:cs.RO OR cat:cs.LG)',
+    '(ti:"embodied AI" OR ti:humanoid OR ti:quadruped OR ti:"dexterous") AND (cat:cs.RO OR cat:cs.AI OR cat:cs.LG)',
+    '(ti:fluid OR ti:turbulence OR ti:"climate model" OR ti:atmospheric) AND (cat:cs.LG OR cat:cs.CE OR cat:physics.flu-dyn)',
+
+    # ── Medical AI ───────────────────────────────────────────────────────
+    '(ti:"medical imaging" OR ti:radiology OR ti:ultrasound OR ti:mammography) AND cat:cs.CV',
+    '(ti:pathology OR ti:histopathology OR ti:"whole slide") AND (cat:cs.CV OR cat:cs.LG)',
+    '(ti:"cancer detection" OR ti:"tumor detection" OR ti:lesion OR ti:nodule) AND cat:cs.CV',
+    '(ti:"drug discovery" OR ti:"drug design" OR ti:"molecular generation") AND (cat:cs.LG OR cat:q-bio.QM OR cat:q-bio.BM)',
+    '(ti:"protein folding" OR ti:alphafold OR ti:"protein structure" OR ti:"protein design") AND (cat:cs.LG OR cat:q-bio.BM)',
+    '(ti:medical AND (ti:LLM OR ti:VLM OR ti:"language model" OR ti:"vision language")) AND (cat:cs.CV OR cat:cs.CL OR cat:cs.AI)',
 ]
 
 # 兼容旧代码
 SEARCH_QUERY = SEARCH_QUERIES[0]
+
+# 增量更新窗口（天）：有历史数据时只抓最近 N 天
+FETCH_RECENT_DAYS = 30
 
 START_YEAR = 2023
 END_YEAR = 2026  # 每次运行时会自动更新为当前年份

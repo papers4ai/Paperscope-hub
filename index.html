@@ -745,6 +745,23 @@
     }
 
     let trendingData = {};  // loaded from output/trending.json
+    let hotExpandedDomain = null;  // track which domain is expanded
+
+    function _hotItem(name, desc, count, pct, rank, domain) {
+      const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+      const tooltip = desc ? `title="${desc}"` : '';
+      return `<div class="hot-item" ${tooltip}>
+        <span class="hot-rank ${rankClass}">${rank}</span>
+        <span class="hot-name">${name}</span>
+        <div class="hot-bar-wrap"><div class="hot-bar ${domain}" style="width:${pct}%"></div></div>
+        <span class="hot-count">${count}</span>
+      </div>`;
+    }
+
+    function toggleHotMore(domain) {
+      hotExpandedDomain = hotExpandedDomain === domain ? null : domain;
+      renderHotTopics(domain);
+    }
 
     function renderHotTopics(domain) {
       const domainNames = {world_model: t('domainNameWM'), physical_ai: t('domainNamePA'), medical_ai: t('domainNameMA')};
@@ -754,35 +771,48 @@
       });
       html += '</div>';
 
-      // Use dynamic trending phrases (from trending.json); fall back to _tasks counting
-      let displayItems = [];
+      // Build item list: dynamic trending.json → fallback _tasks counting
+      let allItems = [];
       const trends = trendingData[domain];
       if (trends && trends.length > 0) {
-        displayItems = trends.slice(0, 5).map(t => ({ name: t.display || t.term, count: t.count }));
+        allItems = trends.map(t => ({ name: t.display || t.term, count: t.count, desc: t.description || '' }));
       } else {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         const papers = allPapers.filter(p => p._domains?.includes(domain) && new Date(p.published) >= sixMonthsAgo);
-        const keywords = {};
-        papers.forEach(p => { (p._tasks||[]).forEach(task => { const n = tn(task); keywords[n] = (keywords[n]||0)+1; }); });
-        displayItems = Object.entries(keywords).sort((a,b) => b[1]-a[1]).slice(0,5).map(([name, count]) => ({ name, count }));
+        const kw = {};
+        papers.forEach(p => { (p._tasks||[]).forEach(task => { const n = tn(task); kw[n] = (kw[n]||0)+1; }); });
+        allItems = Object.entries(kw).sort((a,b) => b[1]-a[1]).map(([name, count]) => ({ name, count, desc: '' }));
       }
 
-      const maxCount = Math.max(...displayItems.map(it => it.count), 1);
-      displayItems.forEach(({ name, count }, i) => {
-        const pct = (count / maxCount * 100).toFixed(0);
-        const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
-        html += `
-          <div class="hot-item">
-            <span class="hot-rank ${rankClass}">${i+1}</span>
-            <span class="hot-name">${name}</span>
-            <div class="hot-bar-wrap">
-              <div class="hot-bar ${domain}" style="width:${pct}%"></div>
-            </div>
-            <span class="hot-count">${count}</span>
-          </div>
-        `;
+      const maxCount = Math.max(...allItems.map(it => it.count), 1);
+      const TOP = 4;
+      const visible  = allItems.slice(0, TOP);
+      const hidden   = allItems.slice(TOP);
+      const expanded = hotExpandedDomain === domain;
+
+      visible.forEach(({ name, desc, count }, i) => {
+        html += _hotItem(name, desc, count, (count/maxCount*100).toFixed(0), i+1, domain);
       });
+
+      if (hidden.length > 0) {
+        if (expanded) {
+          hidden.forEach(({ name, desc, count }, i) => {
+            html += _hotItem(name, desc, count, (count/maxCount*100).toFixed(0), TOP+i+1, domain);
+          });
+        }
+        const btnLabel = expanded
+          ? (currentLang === 'zh' ? '收起 ↑' : 'Show less ↑')
+          : (currentLang === 'zh' ? `查看全部 ${allItems.length} 个 ↓` : `Show all ${allItems.length} ↓`);
+        html += `<button onclick="toggleHotMore('${domain}')"
+          style="margin-top:0.4rem;width:100%;padding:0.28rem 0;border-radius:6px;
+            font-size:0.7rem;cursor:pointer;border:1px solid var(--border);
+            background:var(--surface-bg);color:var(--text-muted);transition:all 0.18s;"
+          onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+          ${btnLabel}
+        </button>`;
+      }
+
       document.getElementById('hotTopicsChart').innerHTML = html;
     }
 
