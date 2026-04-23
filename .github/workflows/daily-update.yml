@@ -67,7 +67,8 @@ jobs:
           git config --local user.name "GitHub Action"
           git add output/
           git diff --cached --quiet || git commit -m "chore: update papers $(date +%Y-%m-%d)"
-          git push
+          git pull --rebase origin main
+          git push origin main
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
