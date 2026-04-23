@@ -2,8 +2,8 @@ name: Daily Paper Update
 
 on:
   schedule:
-    # 每天 UTC 17:30（北京时间 01:30）运行
-    - cron: '30 17 * * *'
+    # 每天 UTC 17:10（北京时间 01:10）运行
+    - cron: '10 17 * * *'
   workflow_dispatch:
 
 permissions:
