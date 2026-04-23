@@ -21,7 +21,7 @@ class ArxivScraper:
         self.delay = delay
         self.progress_file = "output/progress.json"
 
-    def search(self, query: str, start: int = 0, max_results: int = 100, retries: int = 3) -> list:
+    def search(self, query: str, start: int = 0, max_results: int = 100, retries: int = 5) -> list:
         """Search arXiv API with retry logic"""
         params = {
             "search_query": query,
@@ -41,7 +41,7 @@ class ArxivScraper:
                 # Check for rate limit (429) - handle missing status attribute
                 status = getattr(response, 'status', 200)
                 if status == 429:
-                    wait_time = (attempt + 1) * 30  # 30, 60, 90 seconds
+                    wait_time = (attempt + 1) * 60  # 60, 120, 180, 240, 300 seconds
                     logger.warning(f"Rate limited, waiting {wait_time}s...")
                     time.sleep(wait_time)
                     continue
@@ -84,13 +84,23 @@ class ArxivScraper:
         """Fetch all papers matching query"""
         all_papers = []
         start = 0
+        empty_count = 0  # 连续空结果计数
+        max_empty = 2    # 最大连续空结果数
 
         while start < max_total:
             papers = self.search(query, start=start, max_results=batch_size)
 
             if not papers:
-                break
+                empty_count += 1
+                if empty_count >= max_empty:
+                    logger.warning(f"Empty results for {max_empty} consecutive batches, stopping")
+                    break
+                # 单次空结果可能是临时问题，继续尝试下一批
+                logger.warning(f"Empty result, retrying next batch (empty_count={empty_count})")
+                start += batch_size
+                continue
 
+            empty_count = 0  # 重置计数
             all_papers.extend(papers)
             logger.info(f"Fetched {len(all_papers)} papers so far...")
 

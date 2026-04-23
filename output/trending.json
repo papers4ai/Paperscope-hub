@@ -1,0 +1,156 @@
+{
+  "generated": "2026-04-23",
+  "months": 6,
+  "trends": {
+    "world_model": [
+      {
+        "term": "video generation",
+        "display": "Video Generation",
+        "count": 849,
+        "specificity": 1.96
+      },
+      {
+        "term": "video diffusion",
+        "display": "Video Diffusion",
+        "count": 291,
+        "specificity": 2.02
+      },
+      {
+        "term": "autonomous driving",
+        "display": "Autonomous Driving",
+        "count": 170,
+        "specificity": 1.8
+      },
+      {
+        "term": "predictive control",
+        "display": "Predictive Control",
+        "count": 157,
+        "specificity": 1.82
+      },
+      {
+        "term": "gaussian splatting dgs",
+        "display": "Gaussian Splatting Dgs",
+        "count": 155,
+        "specificity": 2.09
+      },
+      {
+        "term": "world modeling",
+        "display": "World Modeling",
+        "count": 145,
+        "specificity": 1.84
+      },
+      {
+        "term": "view synthesis",
+        "display": "View Synthesis",
+        "count": 119,
+        "specificity": 2.09
+      },
+      {
+        "term": "embodied agents",
+        "display": "Embodied Agents",
+        "count": 102,
+        "specificity": 1.63
+      }
+    ],
+    "physical_ai": [
+      {
+        "term": "robotic manipulation",
+        "display": "Robotic Manipulation",
+        "count": 370,
+        "specificity": 2.15
+      },
+      {
+        "term": "partial differential equations",
+        "display": "Partial Differential Equations",
+        "count": 111,
+        "specificity": 2.74
+      },
+      {
+        "term": "dexterous manipulation",
+        "display": "Dexterous Manipulation",
+        "count": 94,
+        "specificity": 2.24
+      },
+      {
+        "term": "vision-language-action vla",
+        "display": "Vision-language-action VLA",
+        "count": 83,
+        "specificity": 1.63
+      },
+      {
+        "term": "fluid dynamics",
+        "display": "Fluid Dynamics",
+        "count": 65,
+        "specificity": 2.55
+      },
+      {
+        "term": "motion planning",
+        "display": "Motion Planning",
+        "count": 59,
+        "specificity": 1.96
+      },
+      {
+        "term": "robot control",
+        "display": "Robot Control",
+        "count": 56,
+        "specificity": 1.97
+      },
+      {
+        "term": "robot manipulation",
+        "display": "Robot Manipulation",
+        "count": 53,
+        "specificity": 1.97
+      }
+    ],
+    "medical_ai": [
+      {
+        "term": "medical image segmentation",
+        "display": "Medical Image Segmentation",
+        "count": 252,
+        "specificity": 5.5
+      },
+      {
+        "term": "medical imaging",
+        "display": "Medical Imaging",
+        "count": 169,
+        "specificity": 5.45
+      },
+      {
+        "term": "medical vision-language",
+        "display": "Medical Vision-language",
+        "count": 69,
+        "specificity": 5.52
+      },
+      {
+        "term": "whole slide",
+        "display": "Whole Slide",
+        "count": 62,
+        "specificity": 5.52
+      },
+      {
+        "term": "computational pathology",
+        "display": "Computational Pathology",
+        "count": 62,
+        "specificity": 5.52
+      },
+      {
+        "term": "drug discovery",
+        "display": "Drug Discovery",
+        "count": 59,
+        "specificity": 5.01
+      },
+      {
+        "term": "medical image analysis",
+        "display": "Medical Image Analysis",
+        "count": 56,
+        "specificity": 5.52
+      },
+      {
+        "term": "image classification",
+        "display": "Image Classification",
+        "count": 56,
+        "specificity": 5.15
+      }
+    ]
+  }
+}
