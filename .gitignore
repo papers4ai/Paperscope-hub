@@ -27,6 +27,7 @@ output/*.xml
 !output/feed.xml
 !output/statistics.json
 !output/task_meta.json
+!output/trending.json
 
 # Mac
 .DS_Store

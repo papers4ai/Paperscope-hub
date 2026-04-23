@@ -106,6 +106,158 @@ def export_task_meta(output_dir: str):
     logger.info(f"Exported task_meta.json: {len(tasks)} tasks across {sum(len(v) for v in domain_tasks.values())} domain slots")
 
 
+def compute_trending(papers: list, output_dir: str, months: int = 6, top_n: int = 8):
+    """
+    Extract truly trending phrases from recent paper titles+abstracts per domain.
+    Uses domain-specificity scoring so generic ML terms (e.g. 'latent space') are
+    ranked below phrases that are distinctive to a particular domain.
+    """
+    import re
+    from collections import Counter
+    from datetime import date, timedelta
+
+    cutoff = (date.today() - timedelta(days=months * 30)).isoformat()
+    recent = [p for p in papers if p.get("published", "") >= cutoff]
+    if not recent:
+        recent = sorted(papers, key=lambda x: x.get("published", ""), reverse=True)[:800]
+
+    STOP = {
+        "a", "an", "the", "and", "or", "of", "in", "on", "at", "to", "for",
+        "with", "by", "from", "this", "that", "is", "are", "was", "were",
+        "be", "been", "have", "has", "do", "does", "we", "our", "it", "its",
+        "they", "which", "as", "such", "can", "also", "not", "but", "than",
+        "based", "proposed", "approach", "method", "model", "models", "paper",
+        "propose", "presents", "present", "show", "shows", "use", "using",
+        "used", "results", "demonstrate", "work", "however", "state", "art",
+        "two", "three", "new", "novel", "existing", "recent", "learning",
+        "deep", "neural", "network", "networks", "data", "task", "tasks",
+        "training", "trained", "large", "high", "low", "via", "into",
+        "each", "both", "across", "while", "without", "further", "thus",
+        "extensive", "experiments", "outperforms", "significantly", "achieves",
+        "benchmark", "performance", "evaluation", "superior", "experimental",
+        "https", "github", "http", "com", "available", "code", "page",
+        "project", "arxiv", "www",
+        # Abbreviations that create noisy duplicate phrases
+        "pdes", "pinns", "pinn", "odes",
+    }
+    # Plural/variant normalization for dedup (not for display)
+    NORM = {
+        "images": "image", "models": "model", "networks": "network",
+        "equations": "equation", "methods": "method", "agents": "agent",
+        "fields": "field", "operators": "operator", "algorithms": "algorithm",
+        "systems": "system", "problems": "problem", "tasks": "task",
+    }
+    BOILERPLATE = re.compile(
+        r"(extensive experiment|state.of.the.art|code available|project page"
+        r"|success rate|real.world|significantly outperform|achieves state"
+        r"|available https|github com|page https)",
+        re.IGNORECASE,
+    )
+    # Known acronyms to display in uppercase
+    UPPER_WORDS = {"pinn", "fno", "vla", "rl", "nlp", "mri", "ct", "vae",
+                   "gan", "llm", "vlm", "nerf", "ai", "3d", "2d", "ood",
+                   "cnn", "rnn", "gnn", "gpt", "ehr", "wsi", "oct"}
+
+    def _display(term: str) -> str:
+        parts = []
+        for w in term.split():
+            parts.append(w.upper() if w in UPPER_WORDS else w.capitalize())
+        return " ".join(parts)
+
+    def _tokenize(text: str):
+        tokens = re.findall(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", text.lower())
+        return [t for t in tokens if t not in STOP and len(t) > 2]
+
+    def _ngrams(texts):
+        counter: Counter = Counter()
+        for text in texts:
+            toks = _tokenize(text)
+            for n in (2, 3):
+                for i in range(len(toks) - n + 1):
+                    counter[" ".join(toks[i: i + n])] += 1
+        return counter
+
+    domains = ["world_model", "physical_ai", "medical_ai"]
+    # Title weighted 2× to surface concise topic phrases
+    domain_texts = {
+        d: [f"{p.get('title','')} {p.get('title','')} {p.get('abstract','')[:400]}"
+            for p in recent if d in p.get("_domains", [])]
+        for d in domains
+    }
+    domain_counts = {d: max(len(domain_texts[d]), 1) for d in domains}
+    domain_ngrams = {d: _ngrams(domain_texts[d]) for d in domains}
+
+    all_texts = [t for ts in domain_texts.values() for t in ts]
+    all_ngrams = _ngrams(all_texts)
+    total = max(len(all_texts), 1)
+
+    result = {}
+    for domain in domains:
+        n_papers = domain_counts[domain]
+        candidates = []
+        for gram, freq in domain_ngrams[domain].most_common(1000):
+            if freq < 3:
+                break
+            if BOILERPLATE.search(gram):
+                continue
+            global_freq = all_ngrams.get(gram, 0)
+            # Specificity: domain rate vs overall rate
+            specificity = (freq / n_papers) / (global_freq / total + 1e-6)
+            if specificity > 1.3:
+                candidates.append({
+                    "term": gram,
+                    "display": _display(gram),
+                    "count": freq,
+                    "specificity": round(specificity, 2),
+                })
+        candidates.sort(key=lambda x: -x["count"])
+
+        # Deduplicate: prefer longer (more specific) phrases over shorter fragments.
+        # If a new phrase is a STRICT SUPERSET of an already-selected one, replace it.
+        # If a new phrase is a STRICT SUBSET of an already-selected one, skip it.
+        def _tok_set(term: str):
+            # Normalize plurals/variants so 'images' == 'image' for dedup purposes
+            return {NORM.get(w, w) for w in re.split(r"[\s\-]+", term.lower())}
+
+        deduped: list = []
+        for c in candidates:
+            c_words = _tok_set(c["term"])
+            skip = False
+            replacements = []     # indices in deduped to replace with c
+
+            for idx, existing in enumerate(deduped):
+                e_words = _tok_set(existing["term"])
+                if c_words == e_words:
+                    skip = True; break          # exact duplicate
+                elif c_words > e_words:
+                    replacements.append(idx)    # c is more specific → replace existing
+                elif c_words < e_words:
+                    skip = True; break          # existing is more specific → skip c
+
+            if skip:
+                continue
+            if replacements:
+                # Replace all subsumed shorter phrases with c (keep first slot)
+                for idx in sorted(replacements, reverse=True):
+                    deduped.pop(idx)
+            deduped.append(c)
+            if len(deduped) >= top_n:
+                break
+
+        result[domain] = deduped
+
+    out = {
+        "generated": datetime.now().isoformat()[:10],
+        "months": months,
+        "trends": result,
+    }
+    with open(f"{output_dir}/trending.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
+    logger.info(
+        "Computed trending: " + ", ".join(f"{d}:{len(result[d])}" for d in domains)
+    )
+
+
 def generate_rss(papers: list, output_dir: str):
     """Generate RSS feed for recent papers"""
     # Sort by date and get last 7 days
@@ -186,6 +338,9 @@ def main():
 
     # Export task metadata for dynamic frontend rendering
     export_task_meta(args.output_dir)
+
+    # Compute trending topics from recent paper abstracts
+    compute_trending(papers, args.output_dir)
 
     # Save statistics
     with open(f"{args.output_dir}/statistics.json", 'w') as f:

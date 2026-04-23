@@ -623,10 +623,11 @@
 
     async function init() {
       try {
-        // Load papers and task metadata in parallel
-        const [papersResp, metaResp] = await Promise.allSettled([
+        // Load papers, task metadata, and trending topics in parallel
+        const [papersResp, metaResp, trendResp] = await Promise.allSettled([
           fetch('output/papers.json'),
-          fetch('output/task_meta.json')
+          fetch('output/task_meta.json'),
+          fetch('output/trending.json')
         ]);
 
         // Apply task metadata first so labels are ready before rendering
@@ -642,6 +643,12 @@
             i18n.zh.taskNames[k] = taskMeta[k].zh || k;
             i18n.en.taskNames[k] = taskMeta[k].en || k;
           });
+        }
+
+        // Load trending topics (from abstract n-gram analysis)
+        if (trendResp.status === 'fulfilled' && trendResp.value.ok) {
+          const trendJson = await trendResp.value.json();
+          trendingData = trendJson.trends || {};
         }
 
         if (papersResp.status === 'fulfilled' && papersResp.value.ok) {
@@ -737,20 +744,9 @@
       renderHotTopics('world_model');
     }
 
-    function renderHotTopics(domain) {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      const papers = allPapers.filter(p => p._domains?.includes(domain) && new Date(p.published) >= sixMonthsAgo);
-      const keywords = {};
-      papers.forEach(p => {
-        (p._tasks||[]).forEach(task => {
-          const name = tn(task);
-          keywords[name] = (keywords[name] || 0) + 1;
-        });
-      });
-      const top = Object.entries(keywords).sort((a,b) => b[1]-a[1]).slice(0, 4);
-      const maxCount = Math.max(...top.map(([,v]) => v), 1);
+    let trendingData = {};  // loaded from output/trending.json
 
+    function renderHotTopics(domain) {
       const domainNames = {world_model: t('domainNameWM'), physical_ai: t('domainNamePA'), medical_ai: t('domainNameMA')};
       let html = '<div style="display:flex;gap:0.3rem;margin-bottom:0.7rem;">';
       ['world_model', 'physical_ai', 'medical_ai'].forEach(d => {
@@ -758,7 +754,22 @@
       });
       html += '</div>';
 
-      top.forEach(([name, count], i) => {
+      // Use dynamic trending phrases (from trending.json); fall back to _tasks counting
+      let displayItems = [];
+      const trends = trendingData[domain];
+      if (trends && trends.length > 0) {
+        displayItems = trends.slice(0, 5).map(t => ({ name: t.display || t.term, count: t.count }));
+      } else {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const papers = allPapers.filter(p => p._domains?.includes(domain) && new Date(p.published) >= sixMonthsAgo);
+        const keywords = {};
+        papers.forEach(p => { (p._tasks||[]).forEach(task => { const n = tn(task); keywords[n] = (keywords[n]||0)+1; }); });
+        displayItems = Object.entries(keywords).sort((a,b) => b[1]-a[1]).slice(0,5).map(([name, count]) => ({ name, count }));
+      }
+
+      const maxCount = Math.max(...displayItems.map(it => it.count), 1);
+      displayItems.forEach(({ name, count }, i) => {
         const pct = (count / maxCount * 100).toFixed(0);
         const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
         html += `

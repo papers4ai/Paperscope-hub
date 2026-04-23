@@ -1,0 +1,156 @@
+{
+  "generated": "2026-04-23",
+  "months": 6,
+  "trends": {
+    "world_model": [
+      {
+        "term": "gaussian splatting",
+        "display": "Gaussian Splatting",
+        "count": 403,
+        "specificity": 2.85
+      },
+      {
+        "term": "video generation",
+        "display": "Video Generation",
+        "count": 234,
+        "specificity": 2.75
+      },
+      {
+        "term": "predictive control",
+        "display": "Predictive Control",
+        "count": 228,
+        "specificity": 2.5
+      },
+      {
+        "term": "world modeling",
+        "display": "World Modeling",
+        "count": 138,
+        "specificity": 2.6
+      },
+      {
+        "term": "autonomous driving",
+        "display": "Autonomous Driving",
+        "count": 105,
+        "specificity": 2.45
+      },
+      {
+        "term": "video diffusion",
+        "display": "Video Diffusion",
+        "count": 85,
+        "specificity": 2.57
+      },
+      {
+        "term": "radiance fields",
+        "display": "Radiance Fields",
+        "count": 78,
+        "specificity": 2.83
+      },
+      {
+        "term": "embodied agents",
+        "display": "Embodied Agents",
+        "count": 77,
+        "specificity": 2.0
+      }
+    ],
+    "physical_ai": [
+      {
+        "term": "partial differential equations",
+        "display": "Partial Differential Equations",
+        "count": 130,
+        "specificity": 2.68
+      },
+      {
+        "term": "robotic manipulation",
+        "display": "Robotic Manipulation",
+        "count": 93,
+        "specificity": 1.7
+      },
+      {
+        "term": "physics-informed machine",
+        "display": "Physics-informed Machine",
+        "count": 73,
+        "specificity": 2.58
+      },
+      {
+        "term": "fluid dynamics",
+        "display": "Fluid Dynamics",
+        "count": 54,
+        "specificity": 2.58
+      },
+      {
+        "term": "inverse problems",
+        "display": "Inverse Problems",
+        "count": 43,
+        "specificity": 2.44
+      },
+      {
+        "term": "physics-informed framework",
+        "display": "Physics-informed Framework",
+        "count": 37,
+        "specificity": 2.52
+      },
+      {
+        "term": "boundary conditions",
+        "display": "Boundary Conditions",
+        "count": 36,
+        "specificity": 2.72
+      },
+      {
+        "term": "dexterous grasping",
+        "display": "Dexterous Grasping",
+        "count": 35,
+        "specificity": 2.03
+      }
+    ],
+    "medical_ai": [
+      {
+        "term": "medical image segmentation",
+        "display": "Medical Image Segmentation",
+        "count": 444,
+        "specificity": 3.23
+      },
+      {
+        "term": "medical imaging",
+        "display": "Medical Imaging",
+        "count": 266,
+        "specificity": 3.18
+      },
+      {
+        "term": "computational pathology",
+        "display": "Computational Pathology",
+        "count": 100,
+        "specificity": 3.2
+      },
+      {
+        "term": "medical image analysis",
+        "display": "Medical Image Analysis",
+        "count": 84,
+        "specificity": 3.24
+      },
+      {
+        "term": "whole slide",
+        "display": "Whole Slide",
+        "count": 83,
+        "specificity": 3.24
+      },
+      {
+        "term": "drug discovery",
+        "display": "Drug Discovery",
+        "count": 78,
+        "specificity": 2.9
+      },
+      {
+        "term": "medical image classification",
+        "display": "Medical Image Classification",
+        "count": 71,
+        "specificity": 3.19
+      },
+      {
+        "term": "report generation",
+        "display": "Report Generation",
+        "count": 68,
+        "specificity": 3.24
+      }
+    ]
+  }
+}
