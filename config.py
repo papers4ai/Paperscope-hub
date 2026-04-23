@@ -328,6 +328,65 @@ MEDICAL_AI_KEYWORDS = [
 # 知名模型
 # ============================================================
 
+# ============================================================
+# 任务英文标签（用于动态生成 task_meta.json，供前端读取）
+# ============================================================
+
+TASK_EN_LABELS = {
+    "VidGen":     "Video Generation",
+    "NeRF":       "NeRF / 3D Gaussian",
+    "MBRL":       "Model-Based RL",
+    "Sim2Real":   "Sim-to-Real",
+    "EmbodiedWM": "Embodied World Model",
+    "Predictive": "Predictive Learning",
+    "PINN":       "Physics-Informed NN",
+    "NeuralOp":   "Neural Operator",
+    "Embodied":   "Embodied AI",
+    "RobotLearn": "Robot Learning",
+    "FluidSim":   "Fluid Simulation",
+    "Climate":    "Climate Prediction",
+    "3DRecon":    "3D Reconstruction",
+    "Pathology":  "Pathology AI",
+    "MedImg":     "Medical Imaging",
+    "Cancer":     "Cancer Diagnosis",
+    "MedVLM":     "Medical VLM",
+    "DrugMol":    "Drug & Molecule",
+    "Protein":    "Protein & Genome",
+    "Clinical":   "Clinical Decision",
+    "Surgery":    "Surgical AI",
+    "HealthMon":  "Health Monitoring",
+}
+
+# 任务 → 所属领域（用于动态生成 domain_tasks 映射）
+TASK_DOMAIN_MAP = {
+    "VidGen":     "world_model",
+    "NeRF":       "world_model",
+    "MBRL":       "world_model",
+    "Sim2Real":   "world_model",
+    "EmbodiedWM": "world_model",
+    "Predictive": "world_model",
+    "PINN":       "physical_ai",
+    "NeuralOp":   "physical_ai",
+    "Embodied":   "physical_ai",
+    "RobotLearn": "physical_ai",
+    "FluidSim":   "physical_ai",
+    "Climate":    "physical_ai",
+    "3DRecon":    "physical_ai",
+    "Pathology":  "medical_ai",
+    "MedImg":     "medical_ai",
+    "Cancer":     "medical_ai",
+    "MedVLM":     "medical_ai",
+    "DrugMol":    "medical_ai",
+    "Protein":    "medical_ai",
+    "Clinical":   "medical_ai",
+    "Surgery":    "medical_ai",
+    "HealthMon":  "medical_ai",
+}
+
+# ============================================================
+# 知名模型
+# ============================================================
+
 MODEL_KEYWORDS = {
     "world_model": [
         r"\bDreamer\b", r"\bPlaNet\b", r"\bRSSM\b", r"\bGAE\b", r"\bSAE\b",

@@ -527,15 +527,7 @@
         badgeMethod: '方法', badgeDataset: '数据集', badgeSurvey: '综述',
         domainNameWM: '世界模型', domainNamePA: '物理AI', domainNameMA: '医疗AI',
         alertNoFav: '您还没有收藏任何论文',
-        taskNames: {
-          VidGen:'视频生成', NeRF:'NeRF三维重建', MBRL:'模型强化学习', Sim2Real:'仿真到现实',
-          EmbodiedWM:'具身世界模型', Predictive:'预测模型',
-          PINN:'物理信息神经网络', NeuralOp:'神经算子', Embodied:'具身智能', RobotLearn:'机器人学习',
-          FluidSim:'流体模拟', Climate:'气候预测', '3DRecon':'3D重建',
-          Pathology:'病理AI', MedImg:'医学影像AI', Cancer:'癌症诊断', MedVLM:'医学多模态大模型',
-          DrugMol:'药物分子设计', Protein:'蛋白质基因', Clinical:'临床决策支持', Surgery:'手术介入AI',
-          HealthMon:'健康监测'
-        }
+        taskNames: {}  // populated dynamically from task_meta.json
       },
       en: {
         docTitle: 'Paperscope - World Model | Physical AI | Medical AI',
@@ -558,19 +550,18 @@
         badgeMethod: 'Method', badgeDataset: 'Dataset', badgeSurvey: 'Survey',
         domainNameWM: 'World Model', domainNamePA: 'Physical AI', domainNameMA: 'Medical AI',
         alertNoFav: 'No saved papers yet',
-        taskNames: {
-          VidGen:'Video Generation', NeRF:'NeRF 3D Reconstruction', MBRL:'Model-Based RL', Sim2Real:'Sim2Real',
-          EmbodiedWM:'Embodied World Model', Predictive:'Predictive Model',
-          PINN:'Physics-Informed NN', NeuralOp:'Neural Operator', Embodied:'Embodied AI', RobotLearn:'Robot Learning',
-          FluidSim:'Fluid Simulation', Climate:'Climate Prediction', '3DRecon':'3D Reconstruction',
-          Pathology:'Pathology AI', MedImg:'Medical Imaging AI', Cancer:'Cancer Diagnosis', MedVLM:'Medical VLM',
-          DrugMol:'Drug & Molecule Design', Protein:'Protein & Genome', Clinical:'Clinical Decision Support', Surgery:'Surgical AI',
-          HealthMon:'Health Monitoring'
-        }
+        taskNames: {}  // populated dynamically from task_meta.json
       }
     };
     function t(key) { return i18n[currentLang][key] || i18n['zh'][key] || key; }
-    function tn(task) { return i18n[currentLang].taskNames[task] || task; }
+    // Task name lookup: dynamic (task_meta.json) first, then fallback to raw abbreviation
+    let taskMeta = {};   // { VidGen: {zh:'视频生成/预测', en:'Video Generation'}, ... }
+    let domainTasksMeta = {};  // { world_model: [...], physical_ai: [...], medical_ai: [...] }
+    function tn(task) {
+      const entry = taskMeta[task];
+      if (entry) return entry[currentLang] || entry['zh'] || task;
+      return task;
+    }
 
     function applyLang(lang) {
       currentLang = lang;
@@ -628,7 +619,8 @@
       'physical_ai': {color:'#10b981'},
       'medical_ai': {color:'#f43f5e'}
     };
-    const domainTasks = {
+    // Fallback static map (overridden at runtime by task_meta.json)
+    let domainTasks = {
       'world_model': ['VidGen', 'NeRF', 'MBRL', 'Sim2Real', 'EmbodiedWM', 'Predictive'],
       'physical_ai': ['PINN', 'NeuralOp', 'Embodied', 'RobotLearn', 'FluidSim', 'Climate', '3DRecon'],
       'medical_ai': ['Pathology', 'MedImg', 'Cancer', 'MedVLM', 'DrugMol', 'Protein', 'Clinical', 'Surgery', 'HealthMon']
@@ -636,8 +628,33 @@
 
     async function init() {
       try {
-        const resp = await fetch('output/papers.json');
-        allPapers = await resp.json();
+        // Load papers and task metadata in parallel
+        const [papersResp, metaResp] = await Promise.allSettled([
+          fetch('output/papers.json'),
+          fetch('output/task_meta.json')
+        ]);
+
+        // Apply task metadata first so labels are ready before rendering
+        if (metaResp.status === 'fulfilled' && metaResp.value.ok) {
+          const meta = await metaResp.value.json();
+          taskMeta = meta.tasks || {};
+          // Override domainTasks with dynamic mapping from task_meta.json
+          if (meta.domain_tasks && Object.keys(meta.domain_tasks).length > 0) {
+            domainTasks = meta.domain_tasks;
+          }
+          // Sync i18n taskNames so any legacy code still using i18n path works
+          Object.keys(taskMeta).forEach(k => {
+            i18n.zh.taskNames[k] = taskMeta[k].zh || k;
+            i18n.en.taskNames[k] = taskMeta[k].en || k;
+          });
+        }
+
+        if (papersResp.status === 'fulfilled' && papersResp.value.ok) {
+          allPapers = await papersResp.value.json();
+        } else {
+          throw new Error('Failed to load papers.json');
+        }
+
         allPapers = allPapers.filter(p => p.year >= 2023);
         initFilters();  // Rebuild filters after data loads
         updateStats();

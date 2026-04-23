@@ -13,6 +13,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(__file__))
 
 from cleaning import clean_papers, deduplicate, get_statistics
+from config import TASK_DEFINITIONS, TASK_EN_LABELS, TASK_DOMAIN_MAP
 
 logging.basicConfig(
     level=logging.INFO,
@@ -83,6 +84,26 @@ def export_by_domain(papers: list, output_dir: str):
             save_json(domain_papers, f"{output_dir}/{filename}")
             save_csv(domain_papers, f"{output_dir}/{filename.replace('.json', '.csv')}")
             logger.info(f"Exported {len(domain_papers)} papers for {domain}")
+
+
+def export_task_meta(output_dir: str):
+    """Export task metadata (labels + domain mapping) for dynamic frontend rendering."""
+    tasks = {}
+    domain_tasks: dict = {"world_model": [], "physical_ai": [], "medical_ai": []}
+
+    for abbr, (zh_label, _keywords) in TASK_DEFINITIONS.items():
+        en_label = TASK_EN_LABELS.get(abbr, abbr)
+        tasks[abbr] = {"zh": zh_label, "en": en_label}
+
+        domain = TASK_DOMAIN_MAP.get(abbr)
+        if domain and domain in domain_tasks:
+            domain_tasks[domain].append(abbr)
+
+    meta = {"tasks": tasks, "domain_tasks": domain_tasks}
+    out_path = f"{output_dir}/task_meta.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+    logger.info(f"Exported task_meta.json: {len(tasks)} tasks across {sum(len(v) for v in domain_tasks.values())} domain slots")
 
 
 def generate_rss(papers: list, output_dir: str):
@@ -162,6 +183,9 @@ def main():
 
     # Generate RSS
     generate_rss(papers, args.output_dir)
+
+    # Export task metadata for dynamic frontend rendering
+    export_task_meta(args.output_dir)
 
     # Save statistics
     with open(f"{args.output_dir}/statistics.json", 'w') as f:

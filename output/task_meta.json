@@ -1,0 +1,122 @@
+{
+  "tasks": {
+    "VidGen": {
+      "zh": "视频生成/预测",
+      "en": "Video Generation"
+    },
+    "NeRF": {
+      "zh": "神经辐射场/3DGS",
+      "en": "NeRF / 3D Gaussian"
+    },
+    "MBRL": {
+      "zh": "基于模型的RL",
+      "en": "Model-Based RL"
+    },
+    "Sim2Real": {
+      "zh": "Sim-to-Real",
+      "en": "Sim-to-Real"
+    },
+    "EmbodiedWM": {
+      "zh": "具身世界模型",
+      "en": "Embodied World Model"
+    },
+    "Predictive": {
+      "zh": "预测学习",
+      "en": "Predictive Learning"
+    },
+    "PINN": {
+      "zh": "物理信息网络",
+      "en": "Physics-Informed NN"
+    },
+    "NeuralOp": {
+      "zh": "神经算子",
+      "en": "Neural Operator"
+    },
+    "Embodied": {
+      "zh": "具身智能",
+      "en": "Embodied AI"
+    },
+    "RobotLearn": {
+      "zh": "机器人学习",
+      "en": "Robot Learning"
+    },
+    "FluidSim": {
+      "zh": "流体/材料模拟",
+      "en": "Fluid Simulation"
+    },
+    "Climate": {
+      "zh": "气候/天气预测",
+      "en": "Climate Prediction"
+    },
+    "3DRecon": {
+      "zh": "3D重建",
+      "en": "3D Reconstruction"
+    },
+    "Pathology": {
+      "zh": "病理AI",
+      "en": "Pathology AI"
+    },
+    "MedImg": {
+      "zh": "医学影像AI",
+      "en": "Medical Imaging"
+    },
+    "Cancer": {
+      "zh": "癌症诊断",
+      "en": "Cancer Diagnosis"
+    },
+    "MedVLM": {
+      "zh": "医学多模态大模型",
+      "en": "Medical VLM"
+    },
+    "DrugMol": {
+      "zh": "药物/分子设计",
+      "en": "Drug & Molecule"
+    },
+    "Protein": {
+      "zh": "蛋白质/基因",
+      "en": "Protein & Genome"
+    },
+    "Clinical": {
+      "zh": "临床决策支持",
+      "en": "Clinical Decision"
+    },
+    "Surgery": {
+      "zh": "手术/介入AI",
+      "en": "Surgical AI"
+    },
+    "HealthMon": {
+      "zh": "健康监测",
+      "en": "Health Monitoring"
+    }
+  },
+  "domain_tasks": {
+    "world_model": [
+      "VidGen",
+      "NeRF",
+      "MBRL",
+      "Sim2Real",
+      "EmbodiedWM",
+      "Predictive"
+    ],
+    "physical_ai": [
+      "PINN",
+      "NeuralOp",
+      "Embodied",
+      "RobotLearn",
+      "FluidSim",
+      "Climate",
+      "3DRecon"
+    ],
+    "medical_ai": [
+      "Pathology",
+      "MedImg",
+      "Cancer",
+      "MedVLM",
+      "DrugMol",
+      "Protein",
+      "Clinical",
+      "Surgery",
+      "HealthMon"
+    ]
+  }
+}

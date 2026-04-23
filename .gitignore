@@ -26,6 +26,7 @@ output/*.xml
 !output/papers_*.csv
 !output/feed.xml
 !output/statistics.json
+!output/task_meta.json
 
 # Mac
 .DS_Store
