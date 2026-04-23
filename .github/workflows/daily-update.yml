@@ -2,14 +2,14 @@ name: Daily Paper Update
 
 on:
   schedule:
-    # 每2小时运行一次
-    - cron: '0 */2 * * *'
+    # 北京时间 10:05（UTC 02:05）和 18:05（UTC 10:05）各抓取一次
+    - cron: '5 2,10 * * *'
   workflow_dispatch:
   push:
     branches:
       - main
     paths-ignore:
-      - 'output/**'  # 忽略 output 目录的变更（工作流自身提交）
+      - 'output/**'   # 忽略 output 目录的变更，防止工作流自循环触发
 
 permissions:
   contents: write
@@ -28,10 +28,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Wait 2 minutes after push
-        if: github.event_name == 'push'
-        run: sleep 120
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -44,15 +40,23 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Fetch new papers
+      # ── 仅定时 / 手动触发时才爬取 arXiv（避免 IP 限速，Push 跳过）──
+      - name: Fetch new papers (scheduled / manual only)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python main.py --update
 
+      # ── Pipeline：定时用 progress.json，Push 用已提交的 papers.json ──
       - name: Run pipeline
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
-        run: python pipeline.py
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python pipeline.py --input output/papers.json
+          else
+            python pipeline.py
+          fi
 
       - name: Commit updated output files
         run: |
