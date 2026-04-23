@@ -1,38 +1,38 @@
 {
-  "total": 21264,
+  "total": 27971,
   "domains": {
-    "world_model": 6787,
-    "physical_ai": 5481,
-    "medical_ai": 3958
+    "world_model": 7202,
+    "physical_ai": 7857,
+    "medical_ai": 5317
   },
   "tasks": {
-    "VidGen": 1816,
-    "RobotLearn": 3106,
-    "Sim2Real": 4269,
-    "HealthMon": 4080,
-    "Climate": 497,
-    "MedImg": 3321,
-    "NeRF": 2414,
-    "3DRecon": 1063,
-    "Cancer": 708,
-    "MBRL": 992,
-    "Predictive": 231,
-    "EmbodiedWM": 310,
-    "Embodied": 1664,
-    "Clinical": 1153,
-    "PINN": 1144,
-    "Surgery": 236,
-    "NeuralOp": 535,
-    "FluidSim": 1327,
-    "Protein": 190,
-    "Pathology": 999,
-    "DrugMol": 267,
-    "MedVLM": 326
+    "VidGen": 1868,
+    "RobotLearn": 4557,
+    "Sim2Real": 6069,
+    "HealthMon": 5501,
+    "Climate": 653,
+    "MedImg": 4552,
+    "NeRF": 2470,
+    "3DRecon": 1241,
+    "Cancer": 904,
+    "MBRL": 1111,
+    "Predictive": 281,
+    "EmbodiedWM": 350,
+    "Embodied": 2527,
+    "Clinical": 1498,
+    "PINN": 1484,
+    "Surgery": 320,
+    "NeuralOp": 602,
+    "FluidSim": 1954,
+    "Protein": 202,
+    "Pathology": 1479,
+    "DrugMol": 271,
+    "MedVLM": 351
   },
   "years": {
     "2023": 5686,
     "2024": 8091,
-    "2025": 3741,
-    "2026": 3746
+    "2026": 3863,
+    "2025": 10331
   }
 }

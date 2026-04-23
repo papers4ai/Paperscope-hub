@@ -134,11 +134,19 @@ def main():
     parser = argparse.ArgumentParser(description="Fetch papers from arXiv")
     parser.add_argument("--full", action="store_true",
                         help="Force full refetch (all years). Default: incremental if cache exists.")
+    parser.add_argument("--refetch-year", type=int, default=None,
+                        help="Force refetch specific year (e.g., --refetch-year 2025)")
     args = parser.parse_args()
 
     existing = load_existing_papers()
 
-    if existing and not args.full:
+    if args.refetch_year:
+        # Remove papers from specified year, then refetch
+        logger.info(f"Forcing refetch of year {args.refetch_year}")
+        existing = {k: v for k, v in existing.items()
+                    if not v.get("published", "").startswith(str(args.refetch_year))}
+        all_papers = fetch_full(existing)
+    elif existing and not args.full:
         # Have history → incremental (last 30 days)
         all_papers = fetch_recent(existing)
     else:
