@@ -43,11 +43,13 @@ paper-hub/
 ├── semantic_search.py      # 语义搜索（可选）
 ├── index.html              # 前端界面
 ├── .github/workflows/      # 自动更新
-└── output/                 # 输出文件
+└── output/                 # 网站运行与 Pages 部署使用的数据输出目录
     ├── papers.json         # 全部论文
     ├── papers_world_model.json
     ├── papers_physical_ai.json
     └── papers_medical_ai.json
+
+说明：前端页面仅加载 `output/` 下的数据文件（如 `output/papers.json`、`output/task_meta.json`、`output/trending.json`）。`outputs/` 为其他产物目录，不参与网站数据加载。
 ```
 
 ## 部署到 GitHub Pages
