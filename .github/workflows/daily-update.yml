@@ -2,9 +2,14 @@ name: Daily Paper Update
 
 on:
   schedule:
-    # 每天 UTC 10:05（北京时间 18:05）运行
-    - cron: '5 10 * * *'
+    # 每2小时运行一次
+    - cron: '0 */2 * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'output/**'  # 忽略 output 目录的变更（工作流自身提交）
 
 permissions:
   contents: write
@@ -23,6 +28,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: Wait 2 minutes after push
+        if: github.event_name == 'push'
+        run: sleep 120
+
       - name: Checkout
         uses: actions/checkout@v4
 
