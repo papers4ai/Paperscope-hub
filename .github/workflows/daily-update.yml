@@ -59,7 +59,7 @@ jobs:
           LLM_MODEL: ${{ vars.LLM_MODEL }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            python pipeline.py --input output/papers.json --skip-trending
+            python pipeline.py --skip-trending
           else
             python pipeline.py
           fi
