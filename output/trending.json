@@ -1,155 +1,155 @@
 {
-  "generated": "2026-04-23",
+  "generated": "2026-04-24",
   "months": 6,
   "trends": {
     "world_model": [
       {
         "term": "video generation",
         "display": "Video Generation",
-        "count": 1346,
-        "specificity": 1.99
+        "count": 143,
+        "specificity": 1.71
       },
       {
         "term": "video diffusion",
         "display": "Video Diffusion",
-        "count": 486,
-        "specificity": 2.03
-      },
-      {
-        "term": "predictive control",
-        "display": "Predictive Control",
-        "count": 439,
-        "specificity": 1.94
+        "count": 38,
+        "specificity": 1.41
       },
       {
         "term": "gaussian splatting dgs",
         "display": "Gaussian Splatting Dgs",
-        "count": 261,
-        "specificity": 2.12
+        "count": 32,
+        "specificity": 1.68
       },
       {
         "term": "autonomous driving",
         "display": "Autonomous Driving",
-        "count": 253,
-        "specificity": 1.82
+        "count": 32,
+        "specificity": 1.43
+      },
+      {
+        "term": "predictive control mpc",
+        "display": "Predictive Control Mpc",
+        "count": 27,
+        "specificity": 1.66
       },
       {
         "term": "world modeling",
         "display": "World Modeling",
-        "count": 223,
-        "specificity": 1.83
+        "count": 25,
+        "specificity": 1.39
       },
       {
-        "term": "view synthesis",
-        "display": "View Synthesis",
-        "count": 203,
-        "specificity": 2.13
+        "term": "feed-forward gaussian splatting",
+        "display": "Feed-forward Gaussian Splatting",
+        "count": 22,
+        "specificity": 1.78
       },
       {
-        "term": "embodied agents",
-        "display": "Embodied Agents",
-        "count": 144,
-        "specificity": 1.59
+        "term": "latent world",
+        "display": "Latent World",
+        "count": 18,
+        "specificity": 1.53
       }
     ],
     "physical_ai": [
       {
         "term": "robotic manipulation",
         "display": "Robotic Manipulation",
-        "count": 767,
-        "specificity": 2.11
+        "count": 61,
+        "specificity": 2.2
       },
       {
         "term": "partial differential equations",
         "display": "Partial Differential Equations",
-        "count": 184,
-        "specificity": 2.64
+        "count": 28,
+        "specificity": 3.1
       },
       {
         "term": "fluid dynamics",
         "display": "Fluid Dynamics",
-        "count": 175,
-        "specificity": 2.55
+        "count": 27,
+        "specificity": 3.1
       },
       {
-        "term": "vision-language-action vla",
-        "display": "Vision-language-action VLA",
-        "count": 148,
-        "specificity": 1.71
+        "term": "weather prediction",
+        "display": "Weather Prediction",
+        "count": 14,
+        "specificity": 2.9
       },
       {
-        "term": "dexterous manipulation",
-        "display": "Dexterous Manipulation",
-        "count": 128,
-        "specificity": 2.11
-      },
-      {
-        "term": "motion planning",
-        "display": "Motion Planning",
-        "count": 117,
-        "specificity": 1.97
+        "term": "optimal control",
+        "display": "Optimal Control",
+        "count": 12,
+        "specificity": 1.69
       },
       {
         "term": "robot control",
         "display": "Robot Control",
-        "count": 114,
-        "specificity": 2.0
+        "count": 12,
+        "specificity": 2.33
       },
       {
         "term": "robot manipulation",
         "display": "Robot Manipulation",
-        "count": 103,
-        "specificity": 1.95
+        "count": 10,
+        "specificity": 2.07
+      },
+      {
+        "term": "fourier operator",
+        "display": "Fourier Operator",
+        "count": 9,
+        "specificity": 3.1
       }
     ],
     "medical_ai": [
       {
-        "term": "medical image segmentation",
-        "display": "Medical Image Segmentation",
-        "count": 440,
-        "specificity": 5.47
+        "term": "drug discovery",
+        "display": "Drug Discovery",
+        "count": 11,
+        "specificity": 5.54
       },
       {
         "term": "medical imaging",
         "display": "Medical Imaging",
-        "count": 274,
-        "specificity": 5.39
+        "count": 10,
+        "specificity": 8.56
       },
       {
-        "term": "computational pathology",
-        "display": "Computational Pathology",
-        "count": 111,
-        "specificity": 5.49
+        "term": "medical image segmentation",
+        "display": "Medical Image Segmentation",
+        "count": 10,
+        "specificity": 8.56
       },
       {
-        "term": "whole slide",
-        "display": "Whole Slide",
-        "count": 110,
-        "specificity": 5.49
+        "term": "breast cancer",
+        "display": "Breast Cancer",
+        "count": 9,
+        "specificity": 8.56
       },
       {
-        "term": "medical vision-language",
-        "display": "Medical Vision-language",
-        "count": 107,
-        "specificity": 5.49
+        "term": "language llms",
+        "display": "Language Llms",
+        "count": 8,
+        "specificity": 5.27
       },
       {
-        "term": "image classification",
-        "display": "Image Classification",
-        "count": 106,
-        "specificity": 5.25
+        "term": "electronic health",
+        "display": "Electronic Health",
+        "count": 8,
+        "specificity": 8.56
       },
       {
-        "term": "medical image analysis",
-        "display": "Medical Image Analysis",
-        "count": 87,
-        "specificity": 5.49
+        "term": "vision language",
+        "display": "Vision Language",
+        "count": 8,
+        "specificity": 5.7
       },
       {
-        "term": "drug discovery",
-        "display": "Drug Discovery",
-        "count": 84,
-        "specificity": 4.81
+        "term": "yet their",
+        "display": "Yet Their",
+        "count": 7,
+        "specificity": 4.61
       }
     ]
   }
