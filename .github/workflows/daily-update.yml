@@ -56,7 +56,14 @@ jobs:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
-        run: python main.py --update-keywords
+        run: |
+          # 如果没有历史数据，执行全量抓取；否则增量更新
+          if [ ! -f output/progress.json ] || [ $(python3 -c "import json; d=json.load(open('output/progress.json')); print(len(d.get('papers',[])))") -lt 100 ]; then
+            echo "No historical data found, running full fetch..."
+            python main.py --full --update-keywords
+          else
+            python main.py --update-keywords
+          fi
 
       # ── Pipeline ──
       # Push 触发：跳过 arXiv 抓取 + 跳过 GLM trending（用缓存），快速部署
