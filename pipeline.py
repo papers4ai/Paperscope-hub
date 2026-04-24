@@ -445,15 +445,19 @@ def main():
                              "Used for fast push-triggered deploys.")
     args = parser.parse_args()
 
-    # Load raw papers - check progress.json first, then papers_raw.json
+    # Load raw papers: progress.json → papers_raw.json → papers.json
     input_file = args.input
     if not os.path.exists(input_file):
-        alt_file = "output/progress.json"
-        if os.path.exists(alt_file):
-            logger.info(f"Loading from {alt_file}")
-            with open(alt_file, 'r') as f:
+        progress_file = "output/progress.json"
+        fallback_file = "output/papers.json"
+        if os.path.exists(progress_file):
+            logger.info(f"Loading from {progress_file}")
+            with open(progress_file, 'r') as f:
                 data = json.load(f)
                 papers = data.get("papers", [])
+        elif os.path.exists(fallback_file):
+            logger.info(f"Loading from {fallback_file} (fallback)")
+            papers = load_papers(fallback_file)
         else:
             raise FileNotFoundError(f"No input file found: {input_file}")
     else:
