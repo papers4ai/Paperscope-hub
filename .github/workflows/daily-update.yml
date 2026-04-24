@@ -40,6 +40,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # ── 恢复 progress.json 历史数据缓存 ──
+      - name: Restore papers cache
+        uses: actions/cache@v4
+        with:
+          path: output/progress.json
+          key: papers-progress-${{ github.run_id }}
+          restore-keys: |
+            papers-progress-
+
       # ── 抓取论文（自动更新关键词 + 抓取）──
       - name: Fetch new papers (scheduled / manual only)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

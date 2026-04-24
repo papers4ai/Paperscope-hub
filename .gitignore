@@ -15,12 +15,12 @@ env/
 *.swo
 
 # Data
+output/progress.json
 output/embeddings.npy
 output/*.json
 output/*.csv
 output/*.xml
 !output/.gitkeep
-!output/progress.json
 !output/papers.json
 !output/papers_*.json
 !output/papers_*.csv
