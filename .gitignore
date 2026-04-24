@@ -15,7 +15,6 @@ env/
 *.swo
 
 # Data
-output/progress.json
 output/embeddings.npy
 output/*.json
 output/*.csv
