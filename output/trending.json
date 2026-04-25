@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-24",
+  "generated": "2026-04-25",
   "months": 6,
   "trends": {
     "world_model": [
@@ -43,7 +43,7 @@
         "term": "view synthesis",
         "display": "View Synthesis",
         "count": 204,
-        "specificity": 2.13
+        "specificity": 2.12
       },
       {
         "term": "embodied agents",
@@ -63,13 +63,13 @@
         "term": "partial differential equations",
         "display": "Partial Differential Equations",
         "count": 184,
-        "specificity": 2.63
+        "specificity": 2.64
       },
       {
         "term": "fluid dynamics",
         "display": "Fluid Dynamics",
         "count": 175,
-        "specificity": 2.54
+        "specificity": 2.55
       },
       {
         "term": "vision-language-action vla",
@@ -87,7 +87,7 @@
         "term": "motion planning",
         "display": "Motion Planning",
         "count": 117,
-        "specificity": 1.96
+        "specificity": 1.97
       },
       {
         "term": "robot control",
@@ -107,7 +107,7 @@
         "term": "medical image segmentation",
         "display": "Medical Image Segmentation",
         "count": 440,
-        "specificity": 5.48
+        "specificity": 5.47
       },
       {
         "term": "medical imaging",
@@ -149,7 +149,7 @@
         "term": "drug discovery",
         "display": "Drug Discovery",
         "count": 84,
-        "specificity": 4.82
+        "specificity": 4.81
       }
     ]
   }
