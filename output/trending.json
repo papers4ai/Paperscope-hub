@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-27",
+  "generated": "2026-04-28",
   "months": 6,
   "trends": {
     "world_model": [
@@ -43,7 +43,7 @@
         "term": "view synthesis",
         "display": "View Synthesis",
         "count": 206,
-        "specificity": 2.1
+        "specificity": 2.09
       },
       {
         "term": "embodied agents",
@@ -56,25 +56,25 @@
       {
         "term": "robotic manipulation",
         "display": "Robotic Manipulation",
-        "count": 758,
+        "count": 756,
         "specificity": 2.12
       },
       {
         "term": "partial differential equations",
         "display": "Partial Differential Equations",
         "count": 182,
-        "specificity": 2.64
+        "specificity": 2.65
       },
       {
         "term": "fluid dynamics",
         "display": "Fluid Dynamics",
         "count": 174,
-        "specificity": 2.55
+        "specificity": 2.56
       },
       {
         "term": "vision-language-action vla",
         "display": "Vision-language-action VLA",
-        "count": 148,
+        "count": 146,
         "specificity": 1.71
       },
       {
@@ -87,7 +87,7 @@
         "term": "motion planning",
         "display": "Motion Planning",
         "count": 116,
-        "specificity": 1.96
+        "specificity": 1.97
       },
       {
         "term": "robot control",
@@ -99,15 +99,15 @@
         "term": "robot manipulation",
         "display": "Robot Manipulation",
         "count": 105,
-        "specificity": 1.93
+        "specificity": 1.94
       }
     ],
     "medical_ai": [
       {
         "term": "medical image segmentation",
         "display": "Medical Image Segmentation",
-        "count": 430,
-        "specificity": 5.52
+        "count": 427,
+        "specificity": 5.51
       },
       {
         "term": "medical imaging",
@@ -137,7 +137,7 @@
         "term": "image classification",
         "display": "Image Classification",
         "count": 99,
-        "specificity": 5.28
+        "specificity": 5.27
       },
       {
         "term": "medical image analysis",
