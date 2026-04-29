@@ -1,13 +1,13 @@
 {
-  "generated": "2026-04-28",
+  "generated": "2026-04-29",
   "months": 6,
   "trends": {
     "world_model": [
       {
         "term": "video generation",
         "display": "Video Generation",
-        "count": 1345,
-        "specificity": 1.98
+        "count": 1337,
+        "specificity": 1.97
       },
       {
         "term": "video diffusion",
@@ -18,25 +18,25 @@
       {
         "term": "predictive control",
         "display": "Predictive Control",
-        "count": 443,
+        "count": 450,
         "specificity": 1.93
       },
       {
         "term": "gaussian splatting dgs",
         "display": "Gaussian Splatting Dgs",
-        "count": 265,
+        "count": 264,
         "specificity": 2.11
       },
       {
         "term": "autonomous driving",
         "display": "Autonomous Driving",
-        "count": 253,
+        "count": 252,
         "specificity": 1.81
       },
       {
         "term": "world modeling",
         "display": "World Modeling",
-        "count": 221,
+        "count": 219,
         "specificity": 1.81
       },
       {
@@ -57,12 +57,12 @@
         "term": "robotic manipulation",
         "display": "Robotic Manipulation",
         "count": 756,
-        "specificity": 2.12
+        "specificity": 2.13
       },
       {
         "term": "partial differential equations",
         "display": "Partial Differential Equations",
-        "count": 182,
+        "count": 181,
         "specificity": 2.65
       },
       {
@@ -74,14 +74,14 @@
       {
         "term": "vision-language-action vla",
         "display": "Vision-language-action VLA",
-        "count": 146,
-        "specificity": 1.71
+        "count": 145,
+        "specificity": 1.7
       },
       {
         "term": "dexterous manipulation",
         "display": "Dexterous Manipulation",
-        "count": 128,
-        "specificity": 2.12
+        "count": 126,
+        "specificity": 2.11
       },
       {
         "term": "motion planning",
@@ -106,14 +106,14 @@
       {
         "term": "medical image segmentation",
         "display": "Medical Image Segmentation",
-        "count": 427,
+        "count": 426,
         "specificity": 5.51
       },
       {
         "term": "medical imaging",
         "display": "Medical Imaging",
-        "count": 268,
-        "specificity": 5.44
+        "count": 266,
+        "specificity": 5.43
       },
       {
         "term": "computational pathology",
@@ -130,7 +130,7 @@
       {
         "term": "medical vision-language",
         "display": "Medical Vision-language",
-        "count": 107,
+        "count": 106,
         "specificity": 5.54
       },
       {
@@ -149,7 +149,7 @@
         "term": "drug discovery",
         "display": "Drug Discovery",
         "count": 84,
-        "specificity": 4.85
+        "specificity": 4.84
       }
     ]
   }
