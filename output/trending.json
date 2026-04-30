@@ -1,55 +1,55 @@
 {
-  "generated": "2026-04-29",
+  "generated": "2026-04-30",
   "months": 6,
   "trends": {
     "world_model": [
       {
         "term": "video generation",
         "display": "Video Generation",
-        "count": 1337,
+        "count": 1338,
         "specificity": 1.97
       },
       {
         "term": "video diffusion",
         "display": "Video Diffusion",
-        "count": 495,
-        "specificity": 2.02
+        "count": 497,
+        "specificity": 2.01
       },
       {
         "term": "predictive control",
         "display": "Predictive Control",
-        "count": 450,
+        "count": 463,
         "specificity": 1.93
       },
       {
         "term": "gaussian splatting dgs",
         "display": "Gaussian Splatting Dgs",
-        "count": 264,
+        "count": 265,
         "specificity": 2.11
       },
       {
         "term": "autonomous driving",
         "display": "Autonomous Driving",
         "count": 252,
-        "specificity": 1.81
+        "specificity": 1.79
       },
       {
         "term": "world modeling",
         "display": "World Modeling",
         "count": 219,
-        "specificity": 1.81
+        "specificity": 1.8
       },
       {
         "term": "view synthesis",
         "display": "View Synthesis",
-        "count": 206,
+        "count": 207,
         "specificity": 2.09
       },
       {
         "term": "embodied agents",
         "display": "Embodied Agents",
-        "count": 145,
-        "specificity": 1.58
+        "count": 144,
+        "specificity": 1.55
       }
     ],
     "physical_ai": [
@@ -62,7 +62,7 @@
       {
         "term": "partial differential equations",
         "display": "Partial Differential Equations",
-        "count": 181,
+        "count": 182,
         "specificity": 2.65
       },
       {
@@ -80,7 +80,7 @@
       {
         "term": "dexterous manipulation",
         "display": "Dexterous Manipulation",
-        "count": 126,
+        "count": 125,
         "specificity": 2.11
       },
       {
@@ -107,49 +107,49 @@
         "term": "medical image segmentation",
         "display": "Medical Image Segmentation",
         "count": 426,
-        "specificity": 5.51
+        "specificity": 5.53
       },
       {
         "term": "medical imaging",
         "display": "Medical Imaging",
-        "count": 266,
-        "specificity": 5.43
+        "count": 263,
+        "specificity": 5.46
       },
       {
         "term": "computational pathology",
         "display": "Computational Pathology",
-        "count": 111,
-        "specificity": 5.54
+        "count": 112,
+        "specificity": 5.56
       },
       {
         "term": "whole slide",
         "display": "Whole Slide",
-        "count": 110,
-        "specificity": 5.54
+        "count": 109,
+        "specificity": 5.56
       },
       {
         "term": "medical vision-language",
         "display": "Medical Vision-language",
         "count": 106,
-        "specificity": 5.54
+        "specificity": 5.56
       },
       {
         "term": "image classification",
         "display": "Image Classification",
         "count": 99,
-        "specificity": 5.27
+        "specificity": 5.29
       },
       {
         "term": "medical image analysis",
         "display": "Medical Image Analysis",
-        "count": 85,
-        "specificity": 5.54
+        "count": 84,
+        "specificity": 5.56
       },
       {
         "term": "drug discovery",
         "display": "Drug Discovery",
-        "count": 84,
-        "specificity": 4.84
+        "count": 77,
+        "specificity": 4.81
       }
     ]
   }
