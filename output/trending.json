@@ -6,13 +6,13 @@
       {
         "term": "video generation",
         "display": "Video Generation",
-        "count": 1338,
+        "count": 1340,
         "specificity": 1.97
       },
       {
         "term": "video diffusion",
         "display": "Video Diffusion",
-        "count": 497,
+        "count": 498,
         "specificity": 2.01
       },
       {
@@ -24,7 +24,7 @@
       {
         "term": "gaussian splatting dgs",
         "display": "Gaussian Splatting Dgs",
-        "count": 265,
+        "count": 266,
         "specificity": 2.11
       },
       {
@@ -37,7 +37,7 @@
         "term": "world modeling",
         "display": "World Modeling",
         "count": 219,
-        "specificity": 1.8
+        "specificity": 1.81
       },
       {
         "term": "view synthesis",
@@ -62,14 +62,14 @@
       {
         "term": "partial differential equations",
         "display": "Partial Differential Equations",
-        "count": 182,
+        "count": 186,
         "specificity": 2.65
       },
       {
         "term": "fluid dynamics",
         "display": "Fluid Dynamics",
         "count": 174,
-        "specificity": 2.56
+        "specificity": 2.55
       },
       {
         "term": "vision-language-action vla",
@@ -107,49 +107,49 @@
         "term": "medical image segmentation",
         "display": "Medical Image Segmentation",
         "count": 426,
-        "specificity": 5.53
+        "specificity": 5.55
       },
       {
         "term": "medical imaging",
         "display": "Medical Imaging",
         "count": 263,
-        "specificity": 5.46
+        "specificity": 5.47
       },
       {
         "term": "computational pathology",
         "display": "Computational Pathology",
         "count": 112,
-        "specificity": 5.56
+        "specificity": 5.57
       },
       {
         "term": "whole slide",
         "display": "Whole Slide",
         "count": 109,
-        "specificity": 5.56
+        "specificity": 5.57
       },
       {
         "term": "medical vision-language",
         "display": "Medical Vision-language",
         "count": 106,
-        "specificity": 5.56
+        "specificity": 5.57
       },
       {
         "term": "image classification",
         "display": "Image Classification",
         "count": 99,
-        "specificity": 5.29
+        "specificity": 5.3
       },
       {
         "term": "medical image analysis",
         "display": "Medical Image Analysis",
         "count": 84,
-        "specificity": 5.56
+        "specificity": 5.57
       },
       {
         "term": "drug discovery",
         "display": "Drug Discovery",
         "count": 77,
-        "specificity": 4.81
+        "specificity": 4.82
       }
     ]
   }
